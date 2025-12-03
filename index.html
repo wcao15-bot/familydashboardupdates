@@ -84,8 +84,6 @@
                     <path d="M9 22V12H15V22" fill="#93C5FD" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
             ),
-            // The School, YMCA, etc. are fallbacks.
-            // If you use a file path (like ./images/school.svg), this code is skipped.
             School: ({className}) => (
                 <svg className={className} viewBox="0 0 24 24" fill="none">
                     <path d="M4 16H20" stroke="#F59E0B" strokeWidth="14" strokeLinecap="round"/>
@@ -137,8 +135,8 @@
             traffic: { 
                 apiKey: 'AIzaSyBs5EBimvIHRmnsa_wKQjtwjK0qA_7Gd0g',
                 routes: [
-                    { label: 'Skyport', origin: '3208 cortona drive, san jose, ca', destination: '1721 technology drive, san jose, ca' },
-                    { label: 'El Camino', origin: '3208 cortona drive, san jose, ca', destination: '555 Knowles Dr, Los Gatos, CA' }
+                    { label: 'Work', origin: '3208 cortona drive, san jose, ca', destination: '1721 technology drive, san jose, ca' },
+                    { label: 'Knowles', origin: '3208 cortona drive, san jose, ca', destination: '555 Knowles Dr, Los Gatos, CA' }
                 ]
             },
             calendar: { 
@@ -174,14 +172,13 @@
                     tasks: [ { id: 'k1', t: "Make Bed", p: 2 }, { id: 'k2', t: "Cups/Dishes to Sink", p: 5 }, { id: 'k3', t: "Workbook", p: 5 }, { id: 'k4', t: "Brush Teeth", p: 5 } ]
                 }
             ],
-            // UPDATED SCHEDULE WITH IMAGE PATHS (Including SVG for school)
             kennedySchedule: [
                 { day: 'Sunday', icon: ['./images/home.png'] }, 
                 { day: 'Monday', icon: ['./images/home.png', './images/ice skate.png'] }, 
-                { day: 'Tuesday', icon: ['./images/school_bus.png'] }, 
-                { day: 'Wednesday', icon: ['./images/school_bus.png'] }, 
-                { day: 'Thursday', icon: ['./images/school_bus.png'] }, 
-                { day: 'Friday', icon: ['./images/school_bus.png'] }, 
+                { day: 'Tuesday', icon: ['./images/school.svg'] }, 
+                { day: 'Wednesday', icon: ['./images/school.svg'] }, 
+                { day: 'Thursday', icon: ['./images/school.svg'] }, 
+                { day: 'Friday', icon: ['./images/school.svg'] }, 
                 { day: 'Saturday', icon: ['./images/y.png'] }
             ]
         };
@@ -199,7 +196,7 @@
             
             // --- CUSTOM IMAGES (Add school.svg here) ---
             { type: 'image', content: './images/home.png' },
-            { type: 'image', content: './images/school_bus.png' },
+            { type: 'image', content: './images/school.svg' },
             { type: 'image', content: './images/y.png' },
             { type: 'image', content: './images/ice skate.png' },
             { type: 'image', content: './images/park.png' },
@@ -562,7 +559,7 @@
             // UPDATED: Use file paths for settings options too
             const iconOptions = [
                 './images/home.png',
-                './images/school-bus.png',
+                './images/school.svg',
                 './images/y.png',
                 './images/ice skate.png',
                 './images/park.png',
