@@ -1,701 +1,683 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.7">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Family Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel (for parsing JSX in browser) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&family=Caveat:wght@700&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Outfit', sans-serif; background-color: #fdfbf7; color: #1f2937; overflow: hidden; touch-action: pan-y; }
+        .card { background: #ffffff; border-radius: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid #f3f4f6; overflow: hidden; }
+        .card-header { background: #f9fafb; border-bottom: 1px solid #f3f4f6; padding: 1rem; }
+        .calendar-wrapper iframe { width: 100%; height: 100%; border: none; }
+        .page-container { transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .font-hand { font-family: 'Caveat', cursive; }
+        .font-kids { font-family: 'Fredoka', sans-serif; }
+        .progress-fill { transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        
+        /* Animations */
+        @keyframes pop { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .animate-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-5px); } 100% { transform: translateY(0px); } }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        @keyframes pulse-red { 0%, 100% { background-color: #ef4444; } 50% { background-color: #b91c1c; } }
+        .animate-alarm { animation: pulse-red 1s infinite; }
+      
+        /* Apple Music */
+        .music-container iframe { border-radius: 16px; border: none; }
+        
+        /* Scrollbar hide */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Sticker specific styles */
+        .sticker { touch-action: none; user-select: none; -webkit-user-select: none; }
+        .sticker:active { cursor: grabbing; scale: 1.1; }
+    </style>
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="en"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;Family Dashboard&lt;/title&gt;</p>
-<p class="p2"><span class="Apple-converted-space">    </span></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Tailwind CSS --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
-<p class="p2"><span class="Apple-converted-space">    </span></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- React &amp; ReactDOM --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"&gt;&lt;/script&gt;</p>
-<p class="p2"><span class="Apple-converted-space">    </span></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Babel (for parsing JSX in browser) --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://unpkg.com/@babel/standalone/babel.min.js"&gt;&lt;/script&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Google Fonts --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&amp;family=Caveat:wght@700&amp;family=Fredoka:wght@600;700&amp;display=swap" rel="stylesheet"&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>body { font-family: 'Outfit', sans-serif; background-color: #fdfbf7; color: #1f2937; overflow: hidden; touch-action: pan-y; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.card { background: #ffffff; border-radius: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid #f3f4f6; overflow: hidden; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.card-header { background: #f9fafb; border-bottom: 1px solid #f3f4f6; padding: 1rem; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.calendar-wrapper iframe { width: 100%; height: 100%; border: none; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.page-container { transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.font-hand { font-family: 'Caveat', cursive; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.font-kids { font-family: 'Fredoka', sans-serif; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.progress-fill { transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* Animations */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>@keyframes pop { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.animate-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>@keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-5px); } 100% { transform: translateY(0px); } }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.animate-float { animation: float 3s ease-in-out infinite; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>@keyframes pulse-red { 0%, 100% { background-color: #ef4444; } 50% { background-color: #b91c1c; } }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.animate-alarm { animation: pulse-red 1s infinite; }</p>
-<p class="p2"><span class="Apple-converted-space">      </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* Apple Music */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.music-container iframe { border-radius: 16px; border: none; }</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* Scrollbar hide */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.no-scrollbar::-webkit-scrollbar { display: none; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>/* Sticker specific styles */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.sticker { touch-action: none; user-select: none; -webkit-user-select: none; }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.sticker:active { cursor: grabbing; scale: 1.1; }</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="root"&gt;&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script type="text/babel"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const { useState, useEffect, useRef } = React;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// --- ICONS (Inline SVGs) ---</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const Icons = {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Sun: ({size = "w-16 h-16"}) =&gt; &lt;svg className={`${size} text-amber-400 fill-amber-100`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;circle cx="12" cy="12" r="4"/&gt;&lt;path d="M12 2v2"/&gt;&lt;path d="M12 20v2"/&gt;&lt;path d="m4.93 4.93 1.41 1.41"/&gt;&lt;path d="m17.66 17.66 1.41 1.41"/&gt;&lt;path d="M2 12h2"/&gt;&lt;path d="M20 12h2"/&gt;&lt;path d="m6.34 17.66-1.41 1.41"/&gt;&lt;path d="m19.07 4.93-1.41 1.41"/&gt;&lt;/svg&gt;,</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Cloud: ({size = "w-16 h-16"}) =&gt; &lt;svg className={`${size} text-slate-400 fill-slate-100`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;path d="M17.5 19c0-3.037-2.463-5.5-5.5-5.5S6.5 15.963 6.5 19"/&gt;&lt;path d="M12 13.5a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11Z"/&gt;&lt;/svg&gt;,</p>
-<p class="p1"><span class="Apple-converted-space">            </span>CloudSun: ({size = "w-16 h-16"}) =&gt; &lt;svg className={`${size}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;path d="M12 2v2" class="text-amber-400"/&gt;&lt;path d="m4.93 4.93 1.41 1.41" class="text-amber-400"/&gt;&lt;path d="M20 12h2" class="text-amber-400"/&gt;&lt;path d="m19.07 4.93-1.41 1.41" class="text-amber-400"/&gt;&lt;path d="M15.977 13.5h.01"/&gt;&lt;path d="M19 17.6a5 5 0 0 0-4.1-8.1 5 5 0 0 0-4.6 3.3" class="text-slate-300"/&gt;&lt;path d="M16.5 20a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z" class="text-slate-400 fill-slate-100"/&gt;&lt;/svg&gt;,</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Rain: ({size = "w-16 h-16"}) =&gt; &lt;svg className={`${size} text-blue-400 fill-blue-50`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/&gt;&lt;path d="M16 14v6"/&gt;&lt;path d="M8 14v6"/&gt;&lt;path d="M12 16v6"/&gt;&lt;/svg&gt;,</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Snow: ({size = "w-16 h-16"}) =&gt; &lt;svg className={`${size} text-sky-300 fill-white`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;path d="M10 14a4 4 0 1 0 4 0 4 4 0 0 0-4 0"/&gt;&lt;path d="M12 3v2"/&gt;&lt;path d="M12 19v2"/&gt;&lt;path d="M3 12h2"/&gt;&lt;path d="M19 12h2"/&gt;&lt;path d="m5.6 5.6 1.4 1.4"/&gt;&lt;path d="m17 17 1.4 1.4"/&gt;&lt;path d="m17 7 1.4-1.4"/&gt;&lt;path d="m5.6 18.4 1.4-1.4"/&gt;&lt;/svg&gt;,</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Thunder: ({size = "w-16 h-16"}) =&gt; &lt;svg className={`${size} text-purple-500 fill-purple-100`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973"/&gt;&lt;path d="m13 12-3 5h4l-3 5"/&gt;&lt;/svg&gt;,</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Car: () =&gt; &lt;svg className="w-6 h-6 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"&gt;&lt;path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/&gt;&lt;circle cx="7" cy="17" r="2"/&gt;&lt;circle cx="17" cy="17" r="2"/&gt;&lt;path d="M2 12h12"/&gt;&lt;/svg&gt;,</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Timer: () =&gt; &lt;svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"&gt;&lt;line x1="10" x2="14" y1="2" y2="2"/&gt;&lt;line x1="12" x2="15" y1="14" y2="11"/&gt;&lt;circle cx="12" cy="14" r="8"/&gt;&lt;/svg&gt;,</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Calendar: () =&gt; &lt;svg className="w-6 h-6 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"&gt;&lt;rect width="18" height="18" x="3" y="4" rx="2" ry="2"/&gt;&lt;line x1="16" x2="16" y1="2" y2="6"/&gt;&lt;line x1="8" x2="8" y1="2" y2="6"/&gt;&lt;line x1="3" x2="21" y1="10" y2="10"/&gt;&lt;/svg&gt;,</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Music: () =&gt; &lt;svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;path d="M9 18V5l12-2v13"/&gt;&lt;circle cx="6" cy="18" r="3"/&gt;&lt;circle cx="18" cy="16" r="3"/&gt;&lt;/svg&gt;,</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Smile: () =&gt; &lt;svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;circle cx="12" cy="12" r="10"/&gt;&lt;path d="M8 14s1.5 2 4 2 4-2 4-2"/&gt;&lt;line x1="9" x2="9.01" y1="9" y2="9"/&gt;&lt;line x1="15" x2="15.01" y1="9" y2="9"/&gt;&lt;/svg&gt;,</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Heart: () =&gt; &lt;svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/&gt;&lt;/svg&gt;,</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Maximize: () =&gt; &lt;svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/&gt;&lt;/svg&gt;,</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Settings: () =&gt; &lt;svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;circle cx="12" cy="12" r="3"/&gt;&lt;path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/&gt;&lt;/svg&gt;,</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Rainbow: () =&gt; &lt;svg className="w-full h-full" viewBox="0 0 100 50" fill="none"&gt;&lt;path d="M10 50 A 40 40 0 0 1 90 50" stroke="#ef4444" strokeWidth="6" strokeLinecap="round" /&gt;&lt;path d="M20 50 A 30 30 0 0 1 80 50" stroke="#eab308" strokeWidth="6" strokeLinecap="round" /&gt;&lt;path d="M30 50 A 20 20 0 0 1 70 50" stroke="#3b82f6" strokeWidth="6" strokeLinecap="round" /&gt;&lt;/svg&gt;,</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Cart: () =&gt; &lt;svg className="w-20 h-20 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;circle cx="8" cy="21" r="1"/&gt;&lt;circle cx="19" cy="21" r="1"/&gt;&lt;path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/&gt;&lt;/svg&gt;,</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Link: () =&gt; &lt;svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/&gt;&lt;polyline points="15 3 21 3 21 9"/&gt;&lt;line x1="10" y1="14" x2="21" y2="3"/&gt;&lt;/svg&gt;,</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Star: () =&gt; &lt;svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"&gt;&lt;/polygon&gt;&lt;/svg&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const FunIcons = {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Home: ({className}) =&gt; (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;svg className={className} viewBox="0 0 24 24" fill="none"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;path d="M3 10L12 3L21 10V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V10Z" fill="#3B82F6"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;path d="M2 10L12 2L22 10" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;path d="M9 22V12H15V22" fill="#93C5FD" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/svg&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>),</p>
-<p class="p1"><span class="Apple-converted-space">            </span>School: ({className}) =&gt; (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;svg className={className} viewBox="0 0 24 24" fill="none"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;path d="M4 16H20" stroke="#F59E0B" strokeWidth="14" strokeLinecap="round"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;path d="M4 16H20" stroke="#FCD34D" strokeWidth="10" strokeLinecap="round"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;circle cx="6" cy="20" r="2.5" fill="#1F2937" stroke="#374151" strokeWidth="1"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;circle cx="18" cy="20" r="2.5" fill="#1F2937" stroke="#374151" strokeWidth="1"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;path d="M2 16L2 12C2 9 4 9 4 9H18" stroke="#F59E0B" strokeWidth="2"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;rect x="5" y="11" width="3" height="3" fill="#93C5FD" rx="0.5"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;rect x="9" y="11" width="3" height="3" fill="#93C5FD" rx="0.5"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;rect x="13" y="11" width="3" height="3" fill="#93C5FD" rx="0.5"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/svg&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>),</p>
-<p class="p1"><span class="Apple-converted-space">            </span>YMCA: ({className}) =&gt; (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;svg className={className} viewBox="0 0 24 24" fill="none"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;text x="50%" y="50%" textAnchor="middle" dy=".35em" fontSize="20" fontWeight="900" fill="#DC2626" stroke="#991B1B" strokeWidth="1"&gt;Y&lt;/text&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/svg&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>),</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Park: ({className}) =&gt; (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;svg className={className} viewBox="0 0 24 24" fill="none"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;path d="M12 22V12" stroke="#92400E" strokeWidth="4" strokeLinecap="round"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;path d="M12 18L7 12L12 6L17 12L12 18Z" fill="#4ADE80" stroke="#166534" strokeWidth="2" strokeLinejoin="round"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;circle cx="12" cy="7" r="5" fill="#22C55E" stroke="#166534" strokeWidth="2"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;path d="M18 6L21 3" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;circle cx="20" cy="4" r="1.5" fill="#F59E0B"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/svg&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>),</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Playdate: ({className}) =&gt; (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;svg className={className} viewBox="0 0 24 24" fill="none"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;circle cx="8" cy="12" r="6" fill="#F472B6"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;circle cx="16" cy="12" r="6" fill="#C084FC"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;path d="M6 11H10" stroke="#831843" strokeWidth="1.5" strokeLinecap="round"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;path d="M14 11H18" stroke="#581C87" strokeWidth="1.5" strokeLinecap="round"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;path d="M8 14C8 14 9 15 10 14" stroke="#831843" strokeWidth="1.5" strokeLinecap="round"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;path d="M16 14C16 14 17 15 18 14" stroke="#581C87" strokeWidth="1.5" strokeLinecap="round"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/svg&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>),</p>
-<p class="p1"><span class="Apple-converted-space">            </span>Iceskating: ({className}) =&gt; (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;svg className={className} viewBox="0 0 24 24" fill="none"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;path d="M12 3v18M3 12h18" stroke="#BFDBFE" strokeWidth="2" strokeLinecap="round"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;path d="M7 7l10 10M7 17L17 7" stroke="#BFDBFE" strokeWidth="2" strokeLinecap="round"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;path d="M6 18L9 21H15" stroke="#1E40AF" strokeWidth="2" strokeLinecap="round"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;circle cx="12" cy="12" r="2" fill="white" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/svg&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>)</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const DEFAULT_CONFIG = {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>weather: { lat: '37.33', lon: '-121.88' },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>traffic: {<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>apiKey: 'AIzaSyBs5EBimvIHRmnsa_wKQjtwjK0qA_7Gd0g',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>routes: [</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>{ label: 'Work', origin: '3208 cortona drive, san jose, ca', destination: '1721 technology drive, san jose, ca' },</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>{ label: 'Knowles', origin: '3208 cortona drive, san jose, ca', destination: '555 Knowles Dr, Los Gatos, CA' }</p>
-<p class="p1"><span class="Apple-converted-space">                </span>]</p>
-<p class="p1"><span class="Apple-converted-space">            </span>},</p>
-<p class="p1"><span class="Apple-converted-space">            </span>calendar: {<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>embedCode: '&lt;iframe src="https://calendar.google.com/calendar/embed?height=600&amp;wkst=1&amp;ctz=America%2FLos_Angeles&amp;showPrint=0&amp;title=Noakeses%20Calendar&amp;src=d2NhbzE1QGdtYWlsLmNvbQ&amp;src=OTA1YjcxM2RiOTI5MjUxYWJmNjZmZjlkOTQ0ODFjZmNiNzgxY2QzNWFiZTIzNmEzYmNlMDMwOGE3NDMyZGVlN0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t&amp;src=Yjg0YzhkM2VlNDg2YTMxYmQzNTA3MTIwOWNmMDVkNWFiZWE3NzA0YzU5ZmIwMzlkNTcyYzA4MmI0ZGVkODkxOUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&amp;src=ZWYxZTE1MzVmOGQzNWQyNmNjNjJlMThhY2E1NDg2ZDg0NGEyYzM3N2VjZjZiNzY3MDdkYjUzMmNkMmVjZjFiYkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&amp;src=MjkzNDYxMDI4NDkzZjllOTJkMTE5ZjYwODgxZDgyMWZjYzA0NDM4NjYwYWI4ZTFkZjQxYzEwZjk5M2E3YWUzM0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t&amp;color=%238e24aa&amp;color=%23f6bf26&amp;color=%23b39ddb&amp;color=%23ef6c00&amp;color=%23d50000" style="border:solid 1px #777" width="800" height="600" frameborder="0" scrolling="no"&gt;&lt;/iframe&gt;'<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>},</p>
-<p class="p1"><span class="Apple-converted-space">            </span>groceryUrl: '',</p>
-<p class="p1"><span class="Apple-converted-space">            </span>photos: [<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>'./images/family01.jpg',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&amp;fit=crop&amp;w=1600&amp;q=80',<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>'https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&amp;fit=crop&amp;w=1600&amp;q=80'<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>],</p>
-<p class="p1"><span class="Apple-converted-space">            </span>countdown: { title: 'Summer Break', date: '2025-06-15' },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>playlists: [</p>
-<p class="p1"><span class="Apple-converted-space">                </span>{ name: "Hits", url: "https://music.apple.com/us/playlist/todays-hits/pl.f4d106fed2bd41149aaacabb233eb5eb" },</p>
-<p class="p1"><span class="Apple-converted-space">                </span>{ name: "Chill", url: "https://music.apple.com/us/playlist/chill-mix/pl.pm-4r18833u029b3" },</p>
-<p class="p1"><span class="Apple-converted-space">                </span>{ name: "Disney", url: "https://music.apple.com/us/playlist/disney-hits/pl.306129990b79427b875505dc2a04944d" }</p>
-<p class="p1"><span class="Apple-converted-space">            </span>],</p>
-<p class="p1"><span class="Apple-converted-space">            </span>family: [</p>
-<p class="p1"><span class="Apple-converted-space">                </span>{<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>id: 1, name: 'Mom', type: 'parent', color: 'bg-rose-100 text-rose-800',<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>calendarUrl: '&lt;iframe src="https://calendar.google.com/calendar/embed?src=wcao15%40gmail.com&amp;ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"&gt;&lt;/iframe&gt;'<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>},</p>
-<p class="p1"><span class="Apple-converted-space">                </span>{<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>id: 2, name: 'Dad', type: 'parent', color: 'bg-blue-100 text-blue-800',<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>calendarUrl: '&lt;iframe src="https://calendar.google.com/calendar/embed?src=293461028493f9e92d119f60881d821fcc04438660ab8e1df41c10f993a7ae33%40group.calendar.google.com&amp;ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"&gt;&lt;/iframe&gt;'<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>},</p>
-<p class="p1"><span class="Apple-converted-space">                </span>{<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>id: 3, name: 'Lincoln', type: 'kid', score: 240, goalName: 'Minecraft Hour', goalTarget: 300, color: 'bg-emerald-100 text-emerald-800',<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>calendarUrl: '',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>tasks: [ { id: 'l1', t: "Make Bed", p: 2 }, { id: 'l2', t: "Cups/Dishes to Sink", p: 5 }, { id: 'l3', t: "Homework", p: 5 }, { id: 'l4', t: "Brush Teeth", p: 5 } ]</p>
-<p class="p1"><span class="Apple-converted-space">                </span>},</p>
-<p class="p1"><span class="Apple-converted-space">                </span>{<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>id: 4, name: 'Kennedy', type: 'kid', score: 190, goalName: 'Dollar Store', goalTarget: 250, color: 'bg-purple-100 text-purple-800',<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>calendarUrl: '',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>tasks: [ { id: 'k1', t: "Make Bed", p: 2 }, { id: 'k2', t: "Cups/Dishes to Sink", p: 5 }, { id: 'k3', t: "Workbook", p: 5 }, { id: 'k4', t: "Brush Teeth", p: 5 } ]</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>],</p>
-<p class="p1"><span class="Apple-converted-space">            </span>kennedySchedule: [</p>
-<p class="p1"><span class="Apple-converted-space">                </span>{ day: 'Sunday', icon: ['Home'] }, { day: 'Monday', icon: ['Home', 'Iceskating'] }, { day: 'Tuesday', icon: ['School'] }, { day: 'Wednesday', icon: ['School'] }, { day: 'Thursday', icon: ['School'] }, { day: 'Friday', icon: ['School'] }, { day: 'Saturday', icon: ['YMCA'] }</p>
-<p class="p1"><span class="Apple-converted-space">            </span>]</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// --- STICKER SYSTEM COMPONENTS ---</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const AVAILABLE_STICKERS = [</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Emojis</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{ type: 'emoji', content: '⭐' }, { type: 'emoji', content: '❤️' }, { type: 'emoji', content: '🎉' },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{ type: 'emoji', content: '🔥' }, { type: 'emoji', content: '✅' }, { type: 'emoji', content: '🎂' },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{ type: 'emoji', content: '⚽' }, { type: 'emoji', content: '🍕' }, { type: 'emoji', content: '🎨' },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// SVGs from Icons</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{ type: 'icon', content: 'Sun' }, { type: 'icon', content: 'Smile' }, { type: 'icon', content: 'Heart' },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>{ type: 'icon', content: 'Rainbow' }, { type: 'icon', content: 'Car' },</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// --- CUSTOM FLATICON IMAGES ---</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 1. Upload your png to the 'images' folder in GitHub</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// 2. Add them here like this:</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// { type: 'image', content: './images/taco.png' },</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// { type: 'image', content: './images/gym.png' },</p>
-<p class="p1"><span class="Apple-converted-space">        </span>];</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const StickerDrawer = ({ isOpen, onClose, onAdd }) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (!isOpen) return null;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="fixed bottom-24 right-6 bg-white p-4 rounded-2xl shadow-2xl z-50 w-72 border border-slate-100 animate-pop"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex justify-between items-center mb-4"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;h3 className="font-bold text-slate-700"&gt;Add Sticker&lt;/h3&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button onClick={onClose} className="text-slate-400 hover:text-slate-600"&gt;✕&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="grid grid-cols-5 gap-2 max-h-64 overflow-y-auto"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>{AVAILABLE_STICKERS.map((s, i) =&gt; (</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;button key={i} onClick={() =&gt; onAdd(s)} className="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-slate-100 rounded-lg text-2xl transition p-1"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                                </span>{s.type === 'emoji' &amp;&amp; s.content}</p>
-<p class="p1"><span class="Apple-converted-space">                                </span>{s.type === 'icon' &amp;&amp; React.createElement(Icons[s.content], { size: "w-6 h-6" })}</p>
-<p class="p1"><span class="Apple-converted-space">                                </span>{s.type === 'image' &amp;&amp; &lt;img src={s.content} className="w-full h-full object-contain" alt="sticker" /&gt;}</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>))}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const StickerLayer = ({ stickers, onUpdate, onRemove }) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [draggingId, setDraggingId] = useState(null);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [offset, setOffset] = useState({ x: 0, y: 0 });</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const containerRef = useRef(null);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const handleStart = (e, id, startX, startY) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>e.stopPropagation();<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>const clientX = e.touches ? e.touches[0].clientX : e.clientX;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const clientY = e.touches ? e.touches[0].clientY : e.clientY;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>setDraggingId(id);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>setOffset({ x: clientX - startX, y: clientY - startY });</p>
-<p class="p1"><span class="Apple-converted-space">            </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const handleMove = (e) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (!draggingId) return;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const clientX = e.touches ? e.touches[0].clientX : e.clientX;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const clientY = e.touches ? e.touches[0].clientY : e.clientY;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>onUpdate(draggingId, clientX - offset.x, clientY - offset.y);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const handleEnd = () =&gt; setDraggingId(null);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>useEffect(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (draggingId) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>window.addEventListener('mousemove', handleMove);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>window.addEventListener('mouseup', handleEnd);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>window.addEventListener('touchmove', handleMove, { passive: false });</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>window.addEventListener('touchend', handleEnd);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                </span>return () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>window.removeEventListener('mousemove', handleMove);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>window.removeEventListener('mouseup', handleEnd);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>window.removeEventListener('touchmove', handleMove);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>window.removeEventListener('touchend', handleEnd);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>};</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}, [draggingId, offset]);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="absolute inset-0 pointer-events-none overflow-hidden z-50"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>{stickers.map(s =&gt; (</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>key={s.id}</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>className="absolute pointer-events-auto cursor-move sticker transition-transform active:scale-110"</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>style={{ left: s.x, top: s.y, transform: 'translate(-50%, -50%)' }}</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>onMouseDown={(e) =&gt; handleStart(e, s.id, s.x, s.y)}</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>onTouchStart={(e) =&gt; handleStart(e, s.id, s.x, s.y)}</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>onDoubleClick={() =&gt; onRemove(s.id)}</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>{s.type === 'emoji' &amp;&amp; &lt;span className="text-6xl drop-shadow-md select-none leading-none"&gt;{s.content}&lt;/span&gt;}</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>{s.type === 'icon' &amp;&amp; &lt;div className="drop-shadow-md text-slate-800"&gt;{React.createElement(Icons[s.content], { size: "w-16 h-16" })}&lt;/div&gt;}</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>{s.type === 'image' &amp;&amp; &lt;img src={s.content} className="w-24 h-24 object-contain drop-shadow-md pointer-events-none" alt="sticker" /&gt;}</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>))}</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// --- COMPONENTS ---</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const KennedyCalendar = ({ schedule }) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const today = new Date().getDay();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const currentMonth = new Date().toLocaleString('default', { month: 'long' }).toUpperCase();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const colors = ['bg-pink-50', 'bg-blue-50', 'bg-green-50', 'bg-yellow-50', 'bg-purple-50', 'bg-orange-50', 'bg-rose-50'];</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// INCREASED KENNEDY ICONS &amp; ADDED IMAGE SUPPORT</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const getIcon = (type, size = "w-24 h-24") =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const props = { className: `${size} drop-shadow-md transition hover:scale-110` };</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>// If the type looks like a file path (contains '.' or '/'), treat it as an image</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (type.includes('.') || type.includes('/')) {</p>
-<p class="p1"><span class="Apple-converted-space">                     </span>return &lt;img src={type} className={`${size} object-contain transition hover:scale-110 drop-shadow-md`} alt="icon" /&gt;;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (FunIcons[type]) return React.createElement(FunIcons[type], props);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>return &lt;FunIcons.Home {...props} /&gt;;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="card h-full flex flex-col p-8 bg-white border border-slate-100 relative overflow-hidden"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="text-center mb-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div className="font-kids text-5xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 font-extrabold tracking-tight"&gt;KENNEDY'S WEEK&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div className="font-kids text-2xl text-slate-400 font-bold tracking-widest mt-2"&gt;{currentMonth}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex-1 grid grid-cols-7 gap-4"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>{schedule.map((item, index) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>const isToday = index === today;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>const icons = Array.isArray(item.icon) ? item.icon : [item.icon];</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>const hasMultiple = icons.length &gt; 1;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">                                </span>&lt;div key={index} className="flex flex-col items-center justify-center relative"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                                    </span>{isToday &amp;&amp; &lt;div className="absolute -top-14 w-32 h-16 animate-float z-20"&gt;&lt;Icons.Rainbow /&gt;&lt;/div&gt;}</p>
-<p class="p1"><span class="Apple-converted-space">                                    </span>&lt;div className={`relative z-10 w-full h-full flex flex-col items-center ${hasMultiple ? 'justify-start pt-8' : 'justify-center'} rounded-3xl border-4 transition-all duration-300 ${isToday ? 'bg-yellow-100 border-yellow-300 shadow-xl scale-105' : `${colors[index]} border-transparent opacity-90`}`}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                                        </span>&lt;div className={`font-kids text-xl mb-4 uppercase tracking-wider font-bold ${isToday ? 'text-yellow-700' : 'text-slate-400'}`}&gt;{item.day.substring(0, 3)}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                                        </span>&lt;div className={`flex flex-wrap justify-center gap-2 ${hasMultiple ? 'px-2' : ''}`}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                                            </span>{icons.map((iconName, i) =&gt; &lt;div key={i} className="flex flex-col items-center"&gt;{getIcon(iconName, hasMultiple ? "w-14 h-14" : "w-24 h-24")}&lt;/div&gt;)}</p>
-<p class="p1"><span class="Apple-converted-space">                                        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>);</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>})}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const TimerWidget = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [timeLeft, setTimeLeft] = useState(0);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [isActive, setIsActive] = useState(false);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [customInput, setCustomInput] = useState("");</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>useEffect(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>let interval = null;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (isActive &amp;&amp; timeLeft &gt; 0) interval = setInterval(() =&gt; setTimeLeft(t =&gt; t - 1), 1000);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>else if (timeLeft === 0) setIsActive(false);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>return () =&gt; clearInterval(interval);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}, [isActive, timeLeft]);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const formatTime = (seconds) =&gt; `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const addTime = (min) =&gt; { setTimeLeft(min * 60); setIsActive(true); };</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className={`card h-full flex flex-col p-6 shadow-xl border-slate-700 transition-colors duration-500 ${timeLeft === 0 &amp;&amp; !isActive ? 'bg-slate-800' : (timeLeft === 0 ? 'animate-alarm' : 'bg-slate-800')}`}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex items-center gap-2 mb-4 text-slate-400 text-sm font-bold uppercase tracking-wider"&gt;&lt;Icons.Timer /&gt; Timer&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex-1 flex items-center justify-center"&gt;&lt;div className={`text-7xl font-mono font-bold ${timeLeft === 0 &amp;&amp; !isActive ? 'text-slate-600' : 'text-white'}`}&gt;{formatTime(timeLeft)}&lt;/div&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="grid grid-cols-4 gap-2 mb-4"&gt;{[1, 5, 15, 30].map(m =&gt; &lt;button key={m} onClick={() =&gt; addTime(m)} className="bg-slate-700 hover:bg-slate-600 py-3 rounded-lg text-white font-bold transition"&gt;+{m}&lt;/button&gt;)}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex gap-3"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button onClick={() =&gt; setIsActive(!isActive)} className={`flex-1 py-3 rounded-xl font-bold text-lg transition ${isActive ? 'bg-yellow-500 text-yellow-900' : 'bg-emerald-500 text-white'}`}&gt;{isActive ? 'Pause' : 'Start'}&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button onClick={() =&gt; { setIsActive(false); setTimeLeft(0); }} className="px-4 py-3 rounded-xl font-bold bg-slate-700 text-slate-300 hover:bg-red-500/20 hover:text-red-300 transition"&gt;Reset&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// --- Standard Widgets ---</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const Clock = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [time, setTime] = useState(new Date());</p>
-<p class="p1"><span class="Apple-converted-space">            </span>useEffect(() =&gt; { const t = setInterval(() =&gt; setTime(new Date()), 1000); return () =&gt; clearInterval(t); }, []);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="flex flex-col drop-shadow-md"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;h1 className="text-8xl font-bold tracking-tight text-slate-800 leading-none"&gt;{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).replace(/\s[AP]M/, '')}&lt;span className="text-2xl text-slate-400 font-medium ml-1"&gt;{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).slice(-2)}&lt;/span&gt;&lt;/h1&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;p className="text-3xl text-slate-500 font-light mt-1"&gt;{time.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const Weather = ({ lat, lon }) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [data, setData] = useState(null);</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>useEffect(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const f = async () =&gt; {<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>try {<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                        </span>const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&amp;longitude=${lon}&amp;current_weather=true&amp;daily=weathercode,temperature_2m_max,temperature_2m_min&amp;temperature_unit=fahrenheit&amp;timezone=auto`);<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                        </span>const d = await r.json();<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                        </span>setData(d);<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>} catch (e) {}<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>};</p>
-<p class="p1"><span class="Apple-converted-space">                </span>f();<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>const t = setInterval(f, 600000);<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>return () =&gt; clearInterval(t);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}, [lat, lon]);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (!data) return &lt;div className="text-slate-300"&gt;Loading...&lt;/div&gt;;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const getIcon = (c, size = "w-16 h-16") =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (c === 0) return &lt;Icons.Sun size={size} /&gt;;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (c === 1 || c === 2) return &lt;Icons.CloudSun size={size} /&gt;;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (c === 3) return &lt;Icons.Cloud size={size} /&gt;;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (c &gt;= 45 &amp;&amp; c &lt;= 48) return &lt;Icons.Cloud size={size} /&gt;;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (c &gt;= 51 &amp;&amp; c &lt;= 67) return &lt;Icons.Rain size={size} /&gt;;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (c &gt;= 71 &amp;&amp; c &lt;= 77) return &lt;Icons.Snow size={size} /&gt;;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (c &gt;= 80 &amp;&amp; c &lt;= 82) return &lt;Icons.Rain size={size} /&gt;;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (c &gt;= 85 &amp;&amp; c &lt;= 86) return &lt;Icons.Snow size={size} /&gt;;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (c &gt;= 95) return &lt;Icons.Thunder size={size} /&gt;;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>return &lt;Icons.Sun size={size} /&gt;;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const today = new Date().getDay();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const day1 = (today + 1) % 7;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const day2 = (today + 2) % 7;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="flex items-center gap-6 bg-white/90 backdrop-blur px-6 py-4 rounded-3xl shadow-lg border border-white/50"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex items-center gap-4"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div className="text-right"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div className="text-5xl font-bold text-slate-800"&gt;{Math.round(data.current_weather.temperature)}°&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div className="text-xs text-slate-500 font-bold uppercase tracking-wider"&gt;Now&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>{getIcon(data.current_weather.weathercode)}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">                    </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="w-px h-16 bg-slate-200"&gt;&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex gap-4"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                         </span>&lt;div className="flex flex-col items-center"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div className="text-xs font-bold text-slate-400 uppercase mb-1"&gt;{days[day1]}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>{getIcon(data.daily.weathercode[1], "w-8 h-8")}</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div className="text-sm font-bold text-slate-700 mt-1"&gt;{Math.round(data.daily.temperature_2m_max[1])}°&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                         </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                         </span>&lt;div className="flex flex-col items-center"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div className="text-xs font-bold text-slate-400 uppercase mb-1"&gt;{days[day2]}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>{getIcon(data.daily.weathercode[2], "w-8 h-8")}</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div className="text-sm font-bold text-slate-700 mt-1"&gt;{Math.round(data.daily.temperature_2m_max[2])}°&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                         </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const Traffic = ({ apiKey, routes }) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [durations, setDurations] = useState({});</p>
-<p class="p1"><span class="Apple-converted-space">            </span>useEffect(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (!apiKey || !routes) return;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const getRoute = () =&gt; {<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>if (!window.google || !window.google.maps) return;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>routes.forEach((route, index) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>const ds = new window.google.maps.DirectionsService();</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>ds.route({ origin: route.origin, destination: route.destination, travelMode: 'DRIVING', drivingOptions: { departureTime: new Date() } }, (res, stat) =&gt; {<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                            </span>if(stat === 'OK') {</p>
-<p class="p1"><span class="Apple-converted-space">                                </span>const time = res.routes[0].legs[0].duration_in_traffic ? res.routes[0].legs[0].duration_in_traffic.text : res.routes[0].legs[0].duration.text;</p>
-<p class="p1"><span class="Apple-converted-space">                                </span>setDurations(prev =&gt; ({...prev, [index]: time}));</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>});</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>});</p>
-<p class="p1"><span class="Apple-converted-space">                </span>};</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (!window.google) { const s = document.createElement("script"); s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&amp;libraries=places`; s.async = true; s.onload = getRoute; document.body.appendChild(s); } else { getRoute(); }</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const t = setInterval(getRoute, 900000); return () =&gt; clearInterval(t);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}, [apiKey, routes]);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="card h-full p-6 flex flex-col justify-center bg-white gap-4 relative"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex items-center gap-2 border-b border-slate-50 pb-2"&gt;&lt;div className="bg-emerald-100 p-1.5 rounded-full"&gt;&lt;Icons.Car /&gt;&lt;/div&gt;&lt;span className="text-slate-400 text-xs font-bold uppercase tracking-wider"&gt;Commute&lt;/span&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="space-y-4"&gt;{routes.map((route, i) =&gt; (&lt;div key={i} className="flex justify-between items-end"&gt;&lt;div&gt;&lt;div className="text-3xl font-bold text-slate-800 leading-none tracking-tight"&gt;{durations[i] || '--'}&lt;/div&gt;&lt;div className="text-xs text-slate-500 mt-1 font-bold uppercase"&gt;{route.label}&lt;/div&gt;&lt;/div&gt;&lt;div className="text-[10px] text-slate-300 max-w-[80px] truncate text-right"&gt;{route.destination.split(',')[0]}&lt;/div&gt;&lt;/div&gt;))}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const Photos = ({ images, embedUrl }) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [idx, setIdx] = useState(0);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>useEffect(() =&gt; { if (!embedUrl) { const t = setInterval(() =&gt; setIdx(i =&gt; (i + 1) % images.length), 10000); return () =&gt; clearInterval(t); } }, [images, embedUrl]);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (embedUrl) return &lt;div className="card w-full h-full relative border-0 shadow-lg bg-black"&gt;&lt;iframe src={embedUrl} className="w-full h-full border-none" scrolling="no" /&gt;&lt;/div&gt;;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return &lt;div className="card w-full h-full relative border-0 shadow-lg bg-slate-200"&gt;&lt;img src={images[idx]} className="w-full h-full object-cover absolute inset-0 transition-opacity duration-1000" /&gt;&lt;/div&gt;;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const GroceryList = ({ url }) =&gt; (</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="card h-full flex flex-col fade-in border-0 shadow-lg relative overflow-hidden"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>{!url ? &lt;div className="flex flex-col items-center justify-center h-full p-6 text-center bg-slate-50"&gt;&lt;div className="bg-emerald-100 p-4 rounded-full mb-4"&gt;&lt;Icons.Cart /&gt;&lt;/div&gt;&lt;h3 className="font-bold text-xl text-slate-800 mb-2"&gt;Synced Grocery List&lt;/h3&gt;&lt;p className="text-slate-500 text-sm mb-6"&gt;Use OurGroceries or Todoist URL in Settings.&lt;/p&gt;&lt;/div&gt; : &lt;iframe src={url} className="w-full h-full border-none" /&gt;}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const ToDoWidget = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [todos, setTodos] = useState(() =&gt; JSON.parse(localStorage.getItem('parentTodos')) || [{ id: 1, text: 'Pay electric bill', done: false }]);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [newTodo, setNewTodo] = useState("");</p>
-<p class="p1"><span class="Apple-converted-space">            </span>useEffect(() =&gt; localStorage.setItem('parentTodos', JSON.stringify(todos)), [todos]);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const addTodo = (e) =&gt; { e.preventDefault(); if (!newTodo.trim()) return; setTodos([...todos, { id: Date.now(), text: newTodo, done: false }]); setNewTodo(""); };</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="card h-full flex flex-col fade-in border-0 shadow-lg"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="card-header bg-white pt-6 pb-4 border-b-0"&gt;&lt;div className="flex items-center justify-between mb-4"&gt;&lt;h3 className="font-bold text-2xl text-slate-800"&gt;To-Dos&lt;/h3&gt;&lt;/div&gt;&lt;form onSubmit={addTodo} className="flex gap-2"&gt;&lt;input className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 outline-none" placeholder="Add task..." value={newTodo} onChange={(e) =&gt; setNewTodo(e.target.value)} /&gt;&lt;button type="submit" className="bg-blue-600 text-white px-5 py-2 rounded-xl font-bold"&gt;Add&lt;/button&gt;&lt;/form&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="p-6 space-y-3 overflow-y-auto flex-1 bg-slate-50/50"&gt;{todos.map(todo =&gt; (&lt;div key={todo.id} className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm"&gt;&lt;div onClick={() =&gt; setTodos(todos.map(t =&gt; t.id === todo.id ? { ...t, done: !t.done } : t))} className="flex items-center gap-3 flex-1 cursor-pointer"&gt;&lt;div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${todo.done ? 'bg-green-500 border-green-500' : 'border-slate-300'}`}&gt;{todo.done &amp;&amp; &lt;span className="text-white text-xs"&gt;✓&lt;/span&gt;}&lt;/div&gt;&lt;span className={todo.done ? 'text-slate-400 line-through' : 'text-slate-700'}&gt;{todo.text}&lt;/span&gt;&lt;/div&gt;&lt;button onClick={() =&gt; setTodos(todos.filter(t =&gt; t.id !== todo.id))} className="text-slate-300 hover:text-red-400"&gt;✕&lt;/button&gt;&lt;/div&gt;))}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const TaskList = ({ member, onUpdateScore }) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const tasks = member.tasks || [];</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const percent = Math.min(100, (member.score / (member.goalTarget || 100)) * 100);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="card h-full flex flex-col fade-in border-0 shadow-lg"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="card-header bg-white pt-6 pb-4"&gt;&lt;div className="flex justify-between items-center mb-4"&gt;&lt;div className="flex items-center gap-3"&gt;&lt;div className={`w-3 h-8 rounded-full ${member.color.split(' ')[0]}`}&gt;&lt;/div&gt;&lt;div&gt;&lt;h3 className="font-bold text-2xl text-slate-800"&gt;{member.name}'s Tasks&lt;/h3&gt;&lt;div className="text-xs text-slate-400 font-bold uppercase tracking-wider"&gt;Goal: {member.goalName}&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div className="text-right"&gt;&lt;span className="text-3xl font-bold text-slate-800"&gt;{member.score}&lt;/span&gt;&lt;span className="text-sm text-slate-400 font-medium"&gt; / {member.goalTarget}&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden"&gt;&lt;div className={`h-full progress-fill ${member.color.split(' ')[0]}`} style={{width: `${percent}%`}}&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="p-6 space-y-3 overflow-y-auto flex-1 bg-slate-50/50"&gt;{tasks.map(task =&gt; (&lt;div key={task.id} className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-100 shadow-sm active:scale-[0.99] cursor-pointer" onClick={() =&gt; onUpdateScore(member.id, task.p)}&gt;&lt;span className="text-lg font-medium text-slate-700"&gt;{task.t}&lt;/span&gt;&lt;span className={`px-3 py-1 rounded-lg text-sm font-bold ${member.color}`}&gt;+{task.p}&lt;/span&gt;&lt;/div&gt;))}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const CalendarView = ({ memberUrl, defaultUrl }) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const url = memberUrl || defaultUrl;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const src = url.match(/src="([^"]+)"/)?.[1] || "";</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="card h-full flex flex-col fade-in border-0 shadow-lg"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="card-header bg-white py-4"&gt;&lt;h3 className="font-bold text-xl text-slate-800 flex items-center gap-2"&gt;&lt;Icons.Calendar /&gt; Schedule&lt;/h3&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex-1 calendar-wrapper bg-white"&gt;{src ? &lt;iframe src={src} scrolling="no" /&gt; : &lt;div className="h-full flex items-center justify-center text-slate-400"&gt;No Calendar Linked&lt;/div&gt;}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const AppleMusicPlayer = ({ playlists }) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [activeUrl, setActiveUrl] = useState(playlists[0]?.url || "");</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const getEmbedUrl = (url) =&gt; url ? url.replace("music.apple.com", "embed.music.apple.com") : "";</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="card h-full flex flex-col p-6 bg-white border-2 border-pink-100 shadow-xl"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;h3 className="text-pink-400 font-kids text-3xl mb-4 flex items-center gap-3 font-bold"&gt;&lt;Icons.Music /&gt; DJ Station&lt;/h3&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex-1 music-container bg-pink-50 rounded-2xl overflow-hidden shadow-inner mb-6 relative"&gt;&lt;iframe src={getEmbedUrl(activeUrl)} width="100%" height="100%" allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" className="absolute inset-0"&gt;&lt;/iframe&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar"&gt;{playlists.map((pl, i) =&gt; (&lt;button key={i} onClick={() =&gt; setActiveUrl(pl.url)} className={`flex-1 min-w-[120px] py-4 px-4 rounded-xl font-kids text-lg font-bold shadow-md ${activeUrl === pl.url ? 'bg-pink-500 text-white ring-4 ring-pink-200' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}&gt;{pl.name}&lt;/button&gt;))}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const JokeWidget = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [joke, setJoke] = useState(null);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [showPunchline, setShowPunchline] = useState(false);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const fetchJoke = async () =&gt; { setShowPunchline(false); try { const res = await fetch('https://official-joke-api.appspot.com/jokes/random'); const data = await res.json(); setJoke(data); } catch (e) { setJoke({ setup: "Why did the chicken cross?", punchline: "To get to the other side!" }); } };</p>
-<p class="p1"><span class="Apple-converted-space">            </span>useEffect(() =&gt; { fetchJoke(); }, []);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div onClick={() =&gt; showPunchline ? fetchJoke() : setShowPunchline(true)} className="card p-8 h-full flex flex-col items-center justify-center text-center cursor-pointer relative bg-gradient-to-br from-indigo-50 to-purple-50 hover:shadow-xl transition border-2 border-purple-100 select-none"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="absolute top-6 left-6 text-purple-400 text-sm font-bold uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full flex items-center gap-1"&gt;&lt;Icons.Smile /&gt; Joke of the Day&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>{joke ? (&lt;div className="mt-8 flex flex-col items-center justify-center h-full w-full"&gt;&lt;div className="font-kids text-4xl text-slate-800 mb-8 leading-snug font-bold max-w-md"&gt;{joke.setup}&lt;/div&gt;{showPunchline ? &lt;div className="font-kids text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600 animate-pop leading-tight drop-shadow-sm"&gt;{joke.punchline}&lt;div className="text-sm font-sans font-medium text-slate-400 mt-6 opacity-60"&gt;(Tap for another)&lt;/div&gt;&lt;/div&gt; : &lt;button className="bg-purple-500 text-white px-8 py-3 rounded-full text-xl font-bold shadow-lg shadow-purple-200 hover:bg-purple-600 transition transform hover:-translate-y-1"&gt;Tap for Answer&lt;/button&gt;}&lt;/div&gt;) : &lt;div className="animate-pulse text-2xl font-kids text-slate-300"&gt;Finding a good one...&lt;/div&gt;}</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const Countdown = ({ targetDate, title }) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [timeLeft, setTimeLeft] = useState("");</p>
-<p class="p1"><span class="Apple-converted-space">            </span>useEffect(() =&gt; { const calc = () =&gt; { const diff = new Date(targetDate).getTime() - new Date().getTime(); setTimeLeft(diff &lt; 0 ? "Hooray!" : `${Math.floor(diff / (1000 * 60 * 60 * 24))} Days`); }; calc(); }, [targetDate]);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="card px-8 flex flex-row items-center justify-between h-full bg-blue-50 border-2 border-blue-100 shadow-md"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex items-center gap-4"&gt;&lt;div className="bg-blue-200 p-2 rounded-lg text-blue-700"&gt;&lt;Icons.Calendar /&gt;&lt;/div&gt;&lt;div&gt;&lt;div className="text-blue-400 uppercase tracking-widest text-xs font-bold"&gt;Countdown&lt;/div&gt;&lt;div className="font-kids text-2xl text-blue-900 font-bold"&gt;{title}&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div className="font-kids text-5xl font-extrabold text-blue-500"&gt;{timeLeft}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// --- SETTINGS ---</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const Settings = ({ isOpen, onClose, config, onSave }) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [temp, setTemp] = useState(config);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if(!isOpen) return null;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const handleFamily = (idx, field, val) =&gt; { const fam = [...temp.family]; fam[idx][field] = val; setTemp({...temp, family: fam}); };</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const handlePlaylist = (idx, field, val) =&gt; { const pl = [...temp.playlists]; pl[idx][field] = val; setTemp({...temp, playlists: pl}); };</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const handleKennedySchedule = (dayIdx, iconName) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const sched = [...temp.kennedySchedule];</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const currentIcons = Array.isArray(sched[dayIdx].icon) ? sched[dayIdx].icon : [sched[dayIdx].icon];</p>
-<p class="p1"><span class="Apple-converted-space">                </span>sched[dayIdx].icon = currentIcons.includes(iconName) ? currentIcons.filter(i =&gt; i !== iconName) : [...currentIcons, iconName];</p>
-<p class="p1"><span class="Apple-converted-space">                </span>setTemp({...temp, kennedySchedule: sched});</p>
-<p class="p1"><span class="Apple-converted-space">            </span>};</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const iconOptions = ['Home', 'School', 'YMCA', 'Playdate', 'Park', 'Iceskating'];</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="bg-white w-[700px] max-h-[85vh] rounded-2xl shadow-2xl flex flex-col"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div className="p-6 border-b border-slate-100 flex justify-between"&gt;&lt;h2 className="text-2xl font-bold"&gt;Settings&lt;/h2&gt;&lt;button onClick={onClose}&gt;✕&lt;/button&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div className="flex-1 overflow-y-auto p-6 space-y-8 text-slate-800"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                             </span>&lt;section&gt;&lt;h3 className="text-slate-400 uppercase text-xs font-bold mb-4"&gt;Kennedy's Calendar&lt;/h3&gt;&lt;div className="space-y-4"&gt;{temp.kennedySchedule.map((day, i) =&gt; (&lt;div key={i} className="bg-slate-50 p-3 rounded-xl border border-slate-200"&gt;&lt;div className="font-bold text-sm mb-2"&gt;{day.day}&lt;/div&gt;&lt;div className="flex flex-wrap gap-2"&gt;{iconOptions.map(opt =&gt; &lt;button key={opt} onClick={() =&gt; handleKennedySchedule(i, opt)} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${(Array.isArray(day.icon) ? day.icon : [day.icon]).includes(opt) ? 'bg-blue-500 text-white shadow-md' : 'bg-white text-slate-500 border border-slate-200'}`}&gt;{opt}&lt;/button&gt;)}&lt;/div&gt;&lt;/div&gt;))}&lt;/div&gt;&lt;/section&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                             </span>&lt;section&gt;&lt;h3 className="text-slate-400 uppercase text-xs font-bold mb-4"&gt;Family &amp; Rewards&lt;/h3&gt;{temp.family.map((mem, i) =&gt; (&lt;div key={i} className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4"&gt;&lt;div className="flex gap-4 mb-3"&gt;&lt;input className="bg-white p-2 rounded w-1/3 border border-slate-200 font-bold" value={mem.name} onChange={e =&gt; handleFamily(i, 'name', e.target.value)} /&gt;{mem.type === 'kid' ? &lt;&gt;&lt;input className="bg-white p-2 rounded flex-1 border border-slate-200 text-sm" placeholder="Reward Goal" value={mem.goalName || ''} onChange={e =&gt; handleFamily(i, 'goalName', e.target.value)} /&gt;&lt;input className="bg-white p-2 rounded w-20 border border-slate-200 text-sm" type="number" placeholder="Target" value={mem.goalTarget || ''} onChange={e =&gt; handleFamily(i, 'goalTarget', e.target.value)} /&gt;&lt;/&gt; : &lt;div className="flex-1 text-xs text-slate-400 flex items-center px-2 italic"&gt;Parent Mode&lt;/div&gt;}&lt;/div&gt;&lt;input className="w-full bg-white p-2 rounded text-xs font-mono border border-slate-200 text-slate-500" placeholder="Calendar Embed Code" value={mem.calendarUrl || ''} onChange={e =&gt; handleFamily(i, 'calendarUrl', e.target.value)} /&gt;&lt;/div&gt;))}&lt;/section&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                             </span>&lt;section&gt;&lt;h3 className="text-slate-400 uppercase text-xs font-bold mb-4"&gt;System&lt;/h3&gt;&lt;div className="space-y-4"&gt;&lt;input className="w-full bg-slate-50 p-3 rounded border border-slate-200 text-xs" placeholder="Traffic API Key" value={temp.traffic.apiKey} onChange={e =&gt; setTemp({...temp, traffic: {...temp.traffic, apiKey: e.target.value}})} /&gt;&lt;input className="w-full bg-slate-50 p-3 rounded border border-slate-200" placeholder="Grocery List URL" value={temp.groceryUrl || ''} onChange={e =&gt; setTemp({...temp, groceryUrl: e.target.value})} /&gt;&lt;/div&gt;&lt;/section&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div className="p-6 border-t border-slate-100 flex justify-end gap-3"&gt;&lt;button onClick={onClose} className="px-6 py-2 text-slate-400"&gt;Cancel&lt;/button&gt;&lt;button onClick={() =&gt; onSave(temp)} className="px-6 py-2 bg-slate-800 text-white rounded-lg font-bold"&gt;Save&lt;/button&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// --- MAIN APP ---</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function App() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [page, setPage] = useState(0);<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [selectedMemberIdx, setSelectedMemberIdx] = useState(null);<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [showSettings, setShowSettings] = useState(false);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [showStickerDrawer, setShowStickerDrawer] = useState(false);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [quickNote, setQuickNote] = useState(() =&gt; localStorage.getItem('dashQuickNote') || "Don't forget milk!");</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Sticker State</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [stickers, setStickers] = useState(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const s = localStorage.getItem('dashStickers');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>return s ? JSON.parse(s) : [];</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const touchStart = useRef(null);</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const [config, setConfig] = useState(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>try { const s = localStorage.getItem('dashConfigV26'); return s ? JSON.parse(s) : DEFAULT_CONFIG; } catch(e) { return DEFAULT_CONFIG; }</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>useEffect(() =&gt; localStorage.setItem('dashStickers', JSON.stringify(stickers)), [stickers]);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const addSticker = (sticker) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const newSticker = {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>id: Date.now(),</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>...sticker,</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>x: window.innerWidth / 2,</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>y: window.innerHeight / 2</p>
-<p class="p1"><span class="Apple-converted-space">                </span>};</p>
-<p class="p1"><span class="Apple-converted-space">                </span>setStickers([...stickers, newSticker]);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>setShowStickerDrawer(false);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const updateSticker = (id, x, y) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>setStickers(stickers.map(s =&gt; s.id === id ? { ...s, x, y } : s));</p>
-<p class="p1"><span class="Apple-converted-space">            </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const removeSticker = (id) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>setStickers(stickers.filter(s =&gt; s.id !== id));</p>
-<p class="p1"><span class="Apple-converted-space">            </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const onTouchEnd = (e) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (!touchStart.current) return;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const dist = touchStart.current - e.changedTouches[0].clientX;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (dist &gt; 50 &amp;&amp; page &lt; 4) setPage(page + 1);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (dist &lt; -50 &amp;&amp; page &gt; 0) setPage(page - 1);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>touchStart.current = null;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const handleScore = (memId, delta) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const newFam = config.family.map(m =&gt; m.id === memId ? { ...m, score: m.score + delta } : m);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const newConfig = { ...config, family: newFam };</p>
-<p class="p1"><span class="Apple-converted-space">                </span>setConfig(newConfig);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>localStorage.setItem('dashConfigV26', JSON.stringify(newConfig));</p>
-<p class="p1"><span class="Apple-converted-space">            </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const saveConfig = (newConf) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>setConfig(newConf);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>localStorage.setItem('dashConfigV26', JSON.stringify(newConf));</p>
-<p class="p1"><span class="Apple-converted-space">                </span>setShowSettings(false);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const toggleFullScreen = () =&gt; { if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } else { if (document.exitFullscreen) { document.exitFullscreen(); } } };</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>return (</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="h-screen w-screen relative select-none bg-[#fdfbf7]" onTouchStart={e =&gt; touchStart.current = e.touches[0].clientX} onTouchEnd={onTouchEnd}&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>{/* Sticker Layer */}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;StickerLayer stickers={stickers} onUpdate={updateSticker} onRemove={removeSticker} /&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>{/* UPDATED HEADER: Gradient background for readability if overlap occurs */}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="absolute top-0 left-0 w-full p-8 flex justify-between items-start pointer-events-none z-40 bg-gradient-to-b from-white/80 to-transparent pb-16"&gt;&lt;Clock /&gt;&lt;Weather lat={config.weather.lat} lon={config.weather.lon} /&gt;&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">                    </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button onClick={toggleFullScreen} className="absolute top-6 right-6 p-3 bg-white rounded-full text-slate-400 hover:text-slate-800 z-50 transition shadow-lg"&gt;&lt;Icons.Maximize /&gt;&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button onClick={() =&gt; setShowSettings(true)} className="absolute bottom-6 right-6 p-3 bg-white rounded-full text-slate-400 hover:text-slate-800 z-50 transition shadow-lg"&gt;&lt;Icons.Settings /&gt;&lt;/button&gt;</p>
-<p class="p2"><span class="Apple-converted-space">                    </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>{/* Sticker Drawer Button */}</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button onClick={() =&gt; setShowStickerDrawer(!showStickerDrawer)} className="absolute bottom-6 right-24 p-3 bg-yellow-400 text-yellow-900 rounded-full hover:bg-yellow-300 z-50 transition shadow-lg hover:scale-110 active:scale-95"&gt;&lt;Icons.Star /&gt;&lt;/button&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex h-full w-[500vw] page-container" style={{ transform: `translateX(-${page * 20}%)` }}&gt;</p>
-<p class="p2"><span class="Apple-converted-space">                        </span></p>
-<p class="p1"><span class="Apple-converted-space">                        </span>{/* PAGE 1: GLANCE (UPDATED PADDING PT-48) */}</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div className="w-screen h-full p-8 pt-48 grid grid-cols-12 grid-rows-6 gap-6"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div className="col-span-8 row-span-6 rounded-3xl overflow-hidden shadow-xl border-4 border-white"&gt;&lt;Photos images={config.photos} embedUrl={config.photoEmbedUrl} /&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div className="col-span-4 row-span-2"&gt;&lt;Traffic apiKey={config.traffic.apiKey} routes={config.traffic.routes} /&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div className="col-span-4 row-span-4"&gt;&lt;div className="card h-full p-6 flex flex-col"&gt;&lt;div className="text-slate-400 text-xs font-bold uppercase mb-4 tracking-wider"&gt;Up Next&lt;/div&gt;&lt;div className="flex-1 -mx-4 mb-4 relative"&gt;{config.calendar.embedCode ? &lt;iframe src={config.calendar.embedCode.match(/src="([^"]+)"/)?.[1] + "&amp;mode=AGENDA&amp;showNav=0&amp;showDate=0&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;bgcolor=%23ffffff"} className="w-full h-full border-none" scrolling="no" /&gt; : &lt;div className="p-4 text-slate-400"&gt;No Calendar&lt;/div&gt;}&lt;/div&gt;&lt;div className="mt-auto pt-4 border-t border-slate-100"&gt;&lt;div className="text-xs text-slate-400 mb-2 font-bold uppercase"&gt;Quick Note&lt;/div&gt;&lt;input className="font-hand text-2xl text-slate-600 bg-transparent w-full border-none focus:outline-none placeholder-slate-300" value={quickNote} onChange={(e) =&gt; { setQuickNote(e.target.value); localStorage.setItem('dashQuickNote', e.target.value); }} placeholder="Type note here..." /&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                        </span>{/* PAGE 2: HUB (UPDATED PADDING PT-48) */}</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div className="w-screen h-full p-8 pt-48 grid grid-cols-12 grid-rows-12 gap-6"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div className="col-span-12 row-span-1 flex gap-4 overflow-x-auto pb-2 no-scrollbar"&gt;&lt;button onClick={() =&gt; setSelectedMemberIdx(null)} className={`px-8 py-3 rounded-full font-bold text-lg transition shadow-sm ${selectedMemberIdx === null ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border border-slate-200'}`}&gt;Family Overview&lt;/button&gt;{config.family.map((mem, i) =&gt; ( &lt;button key={i} onClick={() =&gt; setSelectedMemberIdx(i)} className={`px-6 py-3 rounded-full font-bold text-lg transition shadow-sm flex items-center gap-2 ${selectedMemberIdx === i ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border border-slate-200'}`}&gt;&lt;div className={`w-3 h-3 rounded-full ${mem.color.split(' ')[0]}`}&gt;&lt;/div&gt;{mem.name}&lt;/button&gt; ))}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div className="col-span-7 row-span-11"&gt;&lt;CalendarView memberUrl={selectedMemberIdx !== null ? config.family[selectedMemberIdx].calendarUrl : null} defaultUrl={config.calendar.embedCode} /&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div className="col-span-5 row-span-11"&gt;{selectedMemberIdx !== null ? (config.family[selectedMemberIdx].type === 'parent' ? &lt;ToDoWidget /&gt; : &lt;TaskList member={config.family[selectedMemberIdx]} onUpdateScore={handleScore} /&gt;) : (&lt;div className="card h-full p-6 flex flex-col border-0 shadow-lg"&gt;&lt;div className="card-header bg-white border-none p-0 mb-6"&gt;&lt;h3 className="font-bold text-2xl text-slate-800"&gt;Weekly Progress&lt;/h3&gt;&lt;/div&gt;&lt;div className="space-y-4 overflow-y-auto"&gt;{config.family.filter(m =&gt; m.type === 'kid').map(mem =&gt; (&lt;div key={mem.id} className={`p-5 rounded-2xl border flex items-center justify-between ${mem.color}`}&gt;&lt;div className="flex items-center gap-4"&gt;&lt;div className="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center font-bold text-slate-700 shadow-sm"&gt;{mem.name[0]}&lt;/div&gt;&lt;div&gt;&lt;div className="font-bold text-lg"&gt;{mem.name}&lt;/div&gt;&lt;div className="text-xs opacity-70 font-bold uppercase"&gt;{mem.score} Points&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;))}&lt;/div&gt;&lt;/div&gt;)}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                        </span>{/* PAGE 3: KENNEDY'S CALENDAR (UPDATED PADDING PT-48) */}</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div className="w-screen h-full p-8 pt-48 grid grid-cols-12 gap-6"&gt;&lt;div className="col-span-12 h-full"&gt;&lt;KennedyCalendar schedule={config.kennedySchedule} /&gt;&lt;/div&gt;&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                        </span>{/* PAGE 4: KIDS ZONE (UPDATED PADDING PT-48) */}</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div className="w-screen h-full p-8 pt-48 grid grid-cols-12 grid-rows-12 gap-6"&gt;&lt;div className="col-span-12 row-span-1"&gt;&lt;h2 className="font-kids text-4xl text-slate-800 font-extrabold flex items-center gap-3"&gt;&lt;span className="text-yellow-400"&gt;✨&lt;/span&gt; Kids Zone&lt;/h2&gt;&lt;/div&gt;&lt;div className="col-span-7 row-span-11 flex flex-col gap-6"&gt;&lt;div className="flex-1"&gt;&lt;AppleMusicPlayer playlists={config.playlists} /&gt;&lt;/div&gt;&lt;/div&gt;&lt;div className="col-span-5 row-span-11 flex flex-col gap-6"&gt;&lt;div className="flex-1"&gt;&lt;JokeWidget /&gt;&lt;/div&gt;&lt;div className="h-32"&gt;&lt;Countdown targetDate={config.countdown.date} title={config.countdown.title} /&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                        </span>{/* PAGE 5: UTILITY (UPDATED PADDING PT-48) */}</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div className="w-screen h-full p-8 pt-48 grid grid-cols-12 gap-6"&gt;&lt;div className="col-span-8 h-full"&gt;&lt;GroceryList url={config.groceryUrl} /&gt;&lt;/div&gt;&lt;div className="col-span-4 h-full flex flex-col gap-6"&gt;&lt;div className="flex-1"&gt;&lt;TimerWidget /&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">                        </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-50 bg-white/80 px-6 py-3 rounded-full backdrop-blur-md border border-slate-200 shadow-lg"&gt;{[0, 1, 2, 3, 4].map(i =&gt; &lt;button key={i} onClick={() =&gt; setPage(i)} className={`w-3 h-3 rounded-full transition-all ${page === i ? 'bg-slate-800 scale-125' : 'bg-slate-300'}`} /&gt;)}&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">                    </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;StickerDrawer isOpen={showStickerDrawer} onClose={() =&gt; setShowStickerDrawer(false)} onAdd={addSticker} /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;Settings isOpen={showSettings} onClose={() =&gt; setShowSettings(false)} config={config} onSave={saveConfig} /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const root = ReactDOM.createRoot(document.getElementById('root'));</p>
-<p class="p1"><span class="Apple-converted-space">        </span>root.render(&lt;App /&gt;);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- ICONS (Inline SVGs) ---
+        const Icons = {
+            Sun: ({size = "w-16 h-16"}) => <svg className={`${size} text-amber-400 fill-amber-100`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>,
+            Cloud: ({size = "w-16 h-16"}) => <svg className={`${size} text-slate-400 fill-slate-100`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19c0-3.037-2.463-5.5-5.5-5.5S6.5 15.963 6.5 19"/><path d="M12 13.5a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11Z"/></svg>,
+            CloudSun: ({size = "w-16 h-16"}) => <svg className={`${size}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v2" className="text-amber-400"/><path d="m4.93 4.93 1.41 1.41" className="text-amber-400"/><path d="M20 12h2" className="text-amber-400"/><path d="m19.07 4.93-1.41 1.41" className="text-amber-400"/><path d="M15.977 13.5h.01"/><path d="M19 17.6a5 5 0 0 0-4.1-8.1 5 5 0 0 0-4.6 3.3" className="text-slate-300"/><path d="M16.5 20a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z" className="text-slate-400 fill-slate-100"/></svg>,
+            Rain: ({size = "w-16 h-16"}) => <svg className={`${size} text-blue-400 fill-blue-50`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/></svg>,
+            Snow: ({size = "w-16 h-16"}) => <svg className={`${size} text-sky-300 fill-white`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 14a4 4 0 1 0 4 0 4 4 0 0 0-4 0"/><path d="M12 3v2"/><path d="M12 19v2"/><path d="M3 12h2"/><path d="M19 12h2"/><path d="m5.6 5.6 1.4 1.4"/><path d="m17 17 1.4 1.4"/><path d="m17 7 1.4-1.4"/><path d="m5.6 18.4 1.4-1.4"/></svg>,
+            Thunder: ({size = "w-16 h-16"}) => <svg className={`${size} text-purple-500 fill-purple-100`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973"/><path d="m13 12-3 5h4l-3 5"/></svg>,
+            Car: () => <svg className="w-6 h-6 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M2 12h12"/></svg>,
+            Timer: () => <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>,
+            Calendar: () => <svg className="w-6 h-6 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>,
+            Music: () => <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>,
+            Smile: () => <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></svg>,
+            Heart: () => <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>,
+            Maximize: () => <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>,
+            Settings: () => <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+            Rainbow: () => <svg className="w-full h-full" viewBox="0 0 100 50" fill="none"><path d="M10 50 A 40 40 0 0 1 90 50" stroke="#ef4444" strokeWidth="6" strokeLinecap="round" /><path d="M20 50 A 30 30 0 0 1 80 50" stroke="#eab308" strokeWidth="6" strokeLinecap="round" /><path d="M30 50 A 20 20 0 0 1 70 50" stroke="#3b82f6" strokeWidth="6" strokeLinecap="round" /></svg>,
+            Cart: () => <svg className="w-20 h-20 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>,
+            Link: () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+            Star: () => <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        };
+
+        const FunIcons = {
+            Home: ({className}) => (
+                <svg className={className} viewBox="0 0 24 24" fill="none">
+                    <path d="M3 10L12 3L21 10V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V10Z" fill="#3B82F6"/>
+                    <path d="M2 10L12 2L22 10" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M9 22V12H15V22" fill="#93C5FD" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+            ),
+            School: ({className}) => (
+                <svg className={className} viewBox="0 0 24 24" fill="none">
+                    <path d="M4 16H20" stroke="#F59E0B" strokeWidth="14" strokeLinecap="round"/>
+                    <path d="M4 16H20" stroke="#FCD34D" strokeWidth="10" strokeLinecap="round"/>
+                    <circle cx="6" cy="20" r="2.5" fill="#1F2937" stroke="#374151" strokeWidth="1"/>
+                    <circle cx="18" cy="20" r="2.5" fill="#1F2937" stroke="#374151" strokeWidth="1"/>
+                    <path d="M2 16L2 12C2 9 4 9 4 9H18" stroke="#F59E0B" strokeWidth="2"/>
+                    <rect x="5" y="11" width="3" height="3" fill="#93C5FD" rx="0.5"/>
+                    <rect x="9" y="11" width="3" height="3" fill="#93C5FD" rx="0.5"/>
+                    <rect x="13" y="11" width="3" height="3" fill="#93C5FD" rx="0.5"/>
+                </svg>
+            ),
+            YMCA: ({className}) => (
+                <svg className={className} viewBox="0 0 24 24" fill="none">
+                    <text x="50%" y="50%" textAnchor="middle" dy=".35em" fontSize="20" fontWeight="900" fill="#DC2626" stroke="#991B1B" strokeWidth="1">Y</text>
+                </svg>
+            ),
+            Park: ({className}) => (
+                <svg className={className} viewBox="0 0 24 24" fill="none">
+                    <path d="M12 22V12" stroke="#92400E" strokeWidth="4" strokeLinecap="round"/>
+                    <path d="M12 18L7 12L12 6L17 12L12 18Z" fill="#4ADE80" stroke="#166534" strokeWidth="2" strokeLinejoin="round"/>
+                    <circle cx="12" cy="7" r="5" fill="#22C55E" stroke="#166534" strokeWidth="2"/>
+                    <path d="M18 6L21 3" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round"/>
+                    <circle cx="20" cy="4" r="1.5" fill="#F59E0B"/>
+                </svg>
+            ),
+            Playdate: ({className}) => (
+                <svg className={className} viewBox="0 0 24 24" fill="none">
+                    <circle cx="8" cy="12" r="6" fill="#F472B6"/>
+                    <circle cx="16" cy="12" r="6" fill="#C084FC"/>
+                    <path d="M6 11H10" stroke="#831843" strokeWidth="1.5" strokeLinecap="round"/>
+                    <path d="M14 11H18" stroke="#581C87" strokeWidth="1.5" strokeLinecap="round"/>
+                    <path d="M8 14C8 14 9 15 10 14" stroke="#831843" strokeWidth="1.5" strokeLinecap="round"/>
+                    <path d="M16 14C16 14 17 15 18 14" stroke="#581C87" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+            ),
+            Iceskating: ({className}) => (
+                <svg className={className} viewBox="0 0 24 24" fill="none">
+                    <path d="M12 3v18M3 12h18" stroke="#BFDBFE" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M7 7l10 10M7 17L17 7" stroke="#BFDBFE" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M6 18L9 21H15" stroke="#1E40AF" strokeWidth="2" strokeLinecap="round"/>
+                    <circle cx="12" cy="12" r="2" fill="white" />
+                </svg>
+            )
+        };
+
+        const DEFAULT_CONFIG = {
+            weather: { lat: '37.33', lon: '-121.88' },
+            traffic: { 
+                apiKey: 'AIzaSyBs5EBimvIHRmnsa_wKQjtwjK0qA_7Gd0g',
+                routes: [
+                    { label: 'Work', origin: '3208 cortona drive, san jose, ca', destination: '1721 technology drive, san jose, ca' },
+                    { label: 'Knowles', origin: '3208 cortona drive, san jose, ca', destination: '555 Knowles Dr, Los Gatos, CA' }
+                ]
+            },
+            calendar: { 
+                embedCode: '<iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=America%2FLos_Angeles&showPrint=0&title=Noakeses%20Calendar&src=d2NhbzE1QGdtYWlsLmNvbQ&src=OTA1YjcxM2RiOTI5MjUxYWJmNjZmZjlkOTQ0ODFjZmNiNzgxY2QzNWFiZTIzNmEzYmNlMDMwOGE3NDMyZGVlN0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=Yjg0YzhkM2VlNDg2YTMxYmQzNTA3MTIwOWNmMDVkNWFiZWE3NzA0YzU5ZmIwMzlkNTcyYzA4MmI0ZGVkODkxOUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=ZWYxZTE1MzVmOGQzNWQyNmNjNjJlMThhY2E1NDg2ZDg0NGEyYzM3N2VjZjZiNzY3MDdkYjUzMmNkMmVjZjFiYkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=MjkzNDYxMDI4NDkzZjllOTJkMTE5ZjYwODgxZDgyMWZjYzA0NDM4NjYwYWI4ZTFkZjQxYzEwZjk5M2E3YWUzM0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t&color=%238e24aa&color=%23f6bf26&color=%23b39ddb&color=%23ef6c00&color=%23d50000" style="border:solid 1px #777" width="800" height="600" frameborder="0" scrolling="no"></iframe>' 
+            },
+            groceryUrl: '',
+            photos: [ 
+                './images/family01.jpg'
+            ],
+            countdown: { title: 'Summer Break', date: '2025-06-15' },
+            playlists: [
+                { name: "Hits", url: "https://music.apple.com/us/playlist/todays-hits/pl.f4d106fed2bd41149aaacabb233eb5eb" },
+                { name: "Chill", url: "https://music.apple.com/us/playlist/chill-mix/pl.pm-4r18833u029b3" },
+                { name: "Disney", url: "https://music.apple.com/us/playlist/disney-hits/pl.306129990b79427b875505dc2a04944d" }
+            ],
+            family: [
+                { 
+                    id: 1, name: 'Mom', type: 'parent', color: 'bg-rose-100 text-rose-800', 
+                    calendarUrl: '<iframe src="https://calendar.google.com/calendar/embed?src=wcao15%40gmail.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>' 
+                },
+                { 
+                    id: 2, name: 'Dad', type: 'parent', color: 'bg-blue-100 text-blue-800', 
+                    calendarUrl: '<iframe src="https://calendar.google.com/calendar/embed?src=293461028493f9e92d119f60881d821fcc04438660ab8e1df41c10f993a7ae33%40group.calendar.google.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>' 
+                },
+                { 
+                    id: 3, name: 'Lincoln', type: 'kid', score: 240, goalName: 'Minecraft Hour', goalTarget: 300, color: 'bg-emerald-100 text-emerald-800', 
+                    calendarUrl: '',
+                    tasks: [ { id: 'l1', t: "Make Bed", p: 2 }, { id: 'l2', t: "Cups/Dishes to Sink", p: 5 }, { id: 'l3', t: "Homework", p: 5 }, { id: 'l4', t: "Brush Teeth", p: 5 } ]
+                },
+                { 
+                    id: 4, name: 'Kennedy', type: 'kid', score: 190, goalName: 'Dollar Store', goalTarget: 250, color: 'bg-purple-100 text-purple-800', 
+                    calendarUrl: '',
+                    tasks: [ { id: 'k1', t: "Make Bed", p: 2 }, { id: 'k2', t: "Cups/Dishes to Sink", p: 5 }, { id: 'k3', t: "Workbook", p: 5 }, { id: 'k4', t: "Brush Teeth", p: 5 } ]
+                }
+            ],
+            kennedySchedule: [
+                { day: 'Sunday', icon: ['Home'] }, { day: 'Monday', icon: ['Home', 'Iceskating'] }, { day: 'Tuesday', icon: ['School'] }, { day: 'Wednesday', icon: ['School'] }, { day: 'Thursday', icon: ['School'] }, { day: 'Friday', icon: ['School'] }, { day: 'Saturday', icon: ['YMCA'] }
+            ]
+        };
+
+        // --- STICKER SYSTEM COMPONENTS ---
+        
+        const AVAILABLE_STICKERS = [
+            // Emojis
+            { type: 'emoji', content: '⭐' }, { type: 'emoji', content: '❤️' }, { type: 'emoji', content: '🎉' },
+            { type: 'emoji', content: '🔥' }, { type: 'emoji', content: '✅' }, { type: 'emoji', content: '🎂' },
+            { type: 'emoji', content: '⚽' }, { type: 'emoji', content: '🍕' }, { type: 'emoji', content: '🎨' },
+            // SVGs from Icons
+            { type: 'icon', content: 'Sun' }, { type: 'icon', content: 'Smile' }, { type: 'icon', content: 'Heart' },
+            { type: 'icon', content: 'Rainbow' }, { type: 'icon', content: 'Car' },
+            
+            // --- CUSTOM FLATICON IMAGES ---
+            // 1. Upload your png to the 'images' folder in GitHub
+            // 2. Add them here like this:
+            // { type: 'image', content: './images/taco.png' },
+            // { type: 'image', content: './images/gym.png' },
+        ];
+
+        const StickerDrawer = ({ isOpen, onClose, onAdd }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed bottom-24 right-6 bg-white p-4 rounded-2xl shadow-2xl z-50 w-72 border border-slate-100 animate-pop">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="font-bold text-slate-700">Add Sticker</h3>
+                        <button onClick={onClose} className="text-slate-400 hover:text-slate-600">✕</button>
+                    </div>
+                    <div className="grid grid-cols-5 gap-2 max-h-64 overflow-y-auto">
+                        {AVAILABLE_STICKERS.map((s, i) => (
+                            <button key={i} onClick={() => onAdd(s)} className="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-slate-100 rounded-lg text-2xl transition p-1">
+                                {s.type === 'emoji' && s.content}
+                                {s.type === 'icon' && React.createElement(Icons[s.content], { size: "w-6 h-6" })}
+                                {s.type === 'image' && <img src={s.content} className="w-full h-full object-contain" alt="sticker" />}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const StickerLayer = ({ stickers, onUpdate, onRemove }) => {
+            const [draggingId, setDraggingId] = useState(null);
+            const [offset, setOffset] = useState({ x: 0, y: 0 });
+            const containerRef = useRef(null);
+
+            const handleStart = (e, id, startX, startY) => {
+                e.stopPropagation(); 
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                setDraggingId(id);
+                setOffset({ x: clientX - startX, y: clientY - startY });
+            };
+
+            const handleMove = (e) => {
+                if (!draggingId) return;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                onUpdate(draggingId, clientX - offset.x, clientY - offset.y);
+            };
+
+            const handleEnd = () => setDraggingId(null);
+
+            useEffect(() => {
+                if (draggingId) {
+                    window.addEventListener('mousemove', handleMove);
+                    window.addEventListener('mouseup', handleEnd);
+                    window.addEventListener('touchmove', handleMove, { passive: false });
+                    window.addEventListener('touchend', handleEnd);
+                }
+                return () => {
+                    window.removeEventListener('mousemove', handleMove);
+                    window.removeEventListener('mouseup', handleEnd);
+                    window.removeEventListener('touchmove', handleMove);
+                    window.removeEventListener('touchend', handleEnd);
+                };
+            }, [draggingId, offset]);
+
+            return (
+                <div className="absolute inset-0 pointer-events-none overflow-hidden z-50">
+                    {stickers.map(s => (
+                        <div
+                            key={s.id}
+                            className="absolute pointer-events-auto cursor-move sticker transition-transform active:scale-110"
+                            style={{ left: s.x, top: s.y, transform: 'translate(-50%, -50%)' }}
+                            onMouseDown={(e) => handleStart(e, s.id, s.x, s.y)}
+                            onTouchStart={(e) => handleStart(e, s.id, s.x, s.y)}
+                            onDoubleClick={() => onRemove(s.id)}
+                        >
+                            {s.type === 'emoji' && <span className="text-6xl drop-shadow-md select-none leading-none">{s.content}</span>}
+                            {s.type === 'icon' && <div className="drop-shadow-md text-slate-800">{React.createElement(Icons[s.content], { size: "w-16 h-16" })}</div>}
+                            {s.type === 'image' && <img src={s.content} className="w-24 h-24 object-contain drop-shadow-md pointer-events-none" alt="sticker" />}
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        // --- COMPONENTS ---
+
+        const KennedyCalendar = ({ schedule }) => {
+            const today = new Date().getDay();
+            const currentMonth = new Date().toLocaleString('default', { month: 'long' }).toUpperCase();
+            const colors = ['bg-pink-50', 'bg-blue-50', 'bg-green-50', 'bg-yellow-50', 'bg-purple-50', 'bg-orange-50', 'bg-rose-50'];
+            
+            // INCREASED KENNEDY ICONS & ADDED IMAGE SUPPORT
+            const getIcon = (type, size = "w-24 h-24") => {
+                const props = { className: `${size} drop-shadow-md transition hover:scale-110` };
+                
+                // If the type looks like a file path (contains '.' or '/'), treat it as an image
+                if (type.includes('.') || type.includes('/')) {
+                     return <img src={type} className={`${size} object-contain transition hover:scale-110 drop-shadow-md`} alt="icon" />;
+                }
+
+                if (FunIcons[type]) return React.createElement(FunIcons[type], props);
+                return <FunIcons.Home {...props} />;
+            };
+
+            return (
+                <div className="card h-full flex flex-col p-8 bg-white border border-slate-100 relative overflow-hidden">
+                    <div className="text-center mb-8">
+                        <div className="font-kids text-5xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 font-extrabold tracking-tight">KENNEDY'S WEEK</div>
+                        <div className="font-kids text-2xl text-slate-400 font-bold tracking-widest mt-2">{currentMonth}</div>
+                    </div>
+                    <div className="flex-1 grid grid-cols-7 gap-4">
+                        {schedule.map((item, index) => {
+                            const isToday = index === today;
+                            const icons = Array.isArray(item.icon) ? item.icon : [item.icon];
+                            const hasMultiple = icons.length > 1;
+                            return (
+                                <div key={index} className="flex flex-col items-center justify-center relative">
+                                    {isToday && <div className="absolute -top-14 w-32 h-16 animate-float z-20"><Icons.Rainbow /></div>}
+                                    <div className={`relative z-10 w-full h-full flex flex-col items-center ${hasMultiple ? 'justify-start pt-8' : 'justify-center'} rounded-3xl border-4 transition-all duration-300 ${isToday ? 'bg-yellow-100 border-yellow-300 shadow-xl scale-105' : `${colors[index]} border-transparent opacity-90`}`}>
+                                        <div className={`font-kids text-xl mb-4 uppercase tracking-wider font-bold ${isToday ? 'text-yellow-700' : 'text-slate-400'}`}>{item.day.substring(0, 3)}</div>
+                                        <div className={`flex flex-wrap justify-center gap-2 ${hasMultiple ? 'px-2' : ''}`}>
+                                            {icons.map((iconName, i) => <div key={i} className="flex flex-col items-center">{getIcon(iconName, hasMultiple ? "w-14 h-14" : "w-24 h-24")}</div>)}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        };
+
+        const TimerWidget = () => {
+            const [timeLeft, setTimeLeft] = useState(0);
+            const [isActive, setIsActive] = useState(false);
+            const [customInput, setCustomInput] = useState("");
+            
+            useEffect(() => {
+                let interval = null;
+                if (isActive && timeLeft > 0) interval = setInterval(() => setTimeLeft(t => t - 1), 1000);
+                else if (timeLeft === 0) setIsActive(false);
+                return () => clearInterval(interval);
+            }, [isActive, timeLeft]);
+
+            const formatTime = (seconds) => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
+            const addTime = (min) => { setTimeLeft(min * 60); setIsActive(true); };
+
+            return (
+                <div className={`card h-full flex flex-col p-6 shadow-xl border-slate-700 transition-colors duration-500 ${timeLeft === 0 && !isActive ? 'bg-slate-800' : (timeLeft === 0 ? 'animate-alarm' : 'bg-slate-800')}`}>
+                    <div className="flex items-center gap-2 mb-4 text-slate-400 text-sm font-bold uppercase tracking-wider"><Icons.Timer /> Timer</div>
+                    <div className="flex-1 flex items-center justify-center"><div className={`text-7xl font-mono font-bold ${timeLeft === 0 && !isActive ? 'text-slate-600' : 'text-white'}`}>{formatTime(timeLeft)}</div></div>
+                    <div className="grid grid-cols-4 gap-2 mb-4">{[1, 5, 15, 30].map(m => <button key={m} onClick={() => addTime(m)} className="bg-slate-700 hover:bg-slate-600 py-3 rounded-lg text-white font-bold transition">+{m}</button>)}</div>
+                    <div className="flex gap-3">
+                        <button onClick={() => setIsActive(!isActive)} className={`flex-1 py-3 rounded-xl font-bold text-lg transition ${isActive ? 'bg-yellow-500 text-yellow-900' : 'bg-emerald-500 text-white'}`}>{isActive ? 'Pause' : 'Start'}</button>
+                        <button onClick={() => { setIsActive(false); setTimeLeft(0); }} className="px-4 py-3 rounded-xl font-bold bg-slate-700 text-slate-300 hover:bg-red-500/20 hover:text-red-300 transition">Reset</button>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Standard Widgets ---
+        const Clock = () => {
+            const [time, setTime] = useState(new Date());
+            useEffect(() => { const t = setInterval(() => setTime(new Date()), 1000); return () => clearInterval(t); }, []);
+            return (
+                <div className="flex flex-col drop-shadow-md">
+                    <h1 className="text-8xl font-bold tracking-tight text-slate-800 leading-none">{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).replace(/\s[AP]M/, '')}<span className="text-2xl text-slate-400 font-medium ml-1">{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).slice(-2)}</span></h1>
+                    <p className="text-3xl text-slate-500 font-light mt-1">{time.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                </div>
+            );
+        };
+
+        const Weather = ({ lat, lon }) => {
+            const [data, setData] = useState(null);
+            
+            useEffect(() => {
+                const f = async () => { 
+                    try { 
+                        const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&timezone=auto`); 
+                        const d = await r.json(); 
+                        setData(d); 
+                    } catch (e) {} 
+                };
+                f(); 
+                const t = setInterval(f, 600000); 
+                return () => clearInterval(t);
+            }, [lat, lon]);
+
+            if (!data) return <div className="text-slate-300">Loading...</div>;
+            
+            const getIcon = (c, size = "w-16 h-16") => {
+                if (c === 0) return <Icons.Sun size={size} />;
+                if (c === 1 || c === 2) return <Icons.CloudSun size={size} />;
+                if (c === 3) return <Icons.Cloud size={size} />;
+                if (c >= 45 && c <= 48) return <Icons.Cloud size={size} />;
+                if (c >= 51 && c <= 67) return <Icons.Rain size={size} />;
+                if (c >= 71 && c <= 77) return <Icons.Snow size={size} />;
+                if (c >= 80 && c <= 82) return <Icons.Rain size={size} />;
+                if (c >= 85 && c <= 86) return <Icons.Snow size={size} />;
+                if (c >= 95) return <Icons.Thunder size={size} />;
+                return <Icons.Sun size={size} />;
+            };
+
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const today = new Date().getDay();
+            const day1 = (today + 1) % 7;
+            const day2 = (today + 2) % 7;
+
+            return (
+                <div className="flex items-center gap-6 bg-white/90 backdrop-blur px-6 py-4 rounded-3xl shadow-lg border border-white/50">
+                    <div className="flex items-center gap-4">
+                        <div className="text-right">
+                            <div className="text-5xl font-bold text-slate-800">{Math.round(data.current_weather.temperature)}°</div>
+                            <div className="text-xs text-slate-500 font-bold uppercase tracking-wider">Now</div>
+                        </div>
+                        {getIcon(data.current_weather.weathercode)}
+                    </div>
+                    
+                    <div className="w-px h-16 bg-slate-200"></div>
+
+                    <div className="flex gap-4">
+                         <div className="flex flex-col items-center">
+                            <div className="text-xs font-bold text-slate-400 uppercase mb-1">{days[day1]}</div>
+                            {getIcon(data.daily.weathercode[1], "w-8 h-8")}
+                            <div className="text-sm font-bold text-slate-700 mt-1">{Math.round(data.daily.temperature_2m_max[1])}°</div>
+                         </div>
+                         <div className="flex flex-col items-center">
+                            <div className="text-xs font-bold text-slate-400 uppercase mb-1">{days[day2]}</div>
+                            {getIcon(data.daily.weathercode[2], "w-8 h-8")}
+                            <div className="text-sm font-bold text-slate-700 mt-1">{Math.round(data.daily.temperature_2m_max[2])}°</div>
+                         </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Traffic = ({ apiKey, routes }) => {
+            const [durations, setDurations] = useState({});
+            useEffect(() => {
+                if (!apiKey || !routes) return;
+                const getRoute = () => { 
+                    if (!window.google || !window.google.maps) return;
+                    routes.forEach((route, index) => {
+                        const ds = new window.google.maps.DirectionsService();
+                        ds.route({ origin: route.origin, destination: route.destination, travelMode: 'DRIVING', drivingOptions: { departureTime: new Date() } }, (res, stat) => { 
+                            if(stat === 'OK') {
+                                const time = res.routes[0].legs[0].duration_in_traffic ? res.routes[0].legs[0].duration_in_traffic.text : res.routes[0].legs[0].duration.text;
+                                setDurations(prev => ({...prev, [index]: time}));
+                            }
+                        });
+                    });
+                };
+                if (!window.google) { const s = document.createElement("script"); s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`; s.async = true; s.onload = getRoute; document.body.appendChild(s); } else { getRoute(); }
+                const t = setInterval(getRoute, 900000); return () => clearInterval(t);
+            }, [apiKey, routes]);
+            return (
+                <div className="card h-full p-6 flex flex-col justify-center bg-white gap-4 relative">
+                    <div className="flex items-center gap-2 border-b border-slate-50 pb-2"><div className="bg-emerald-100 p-1.5 rounded-full"><Icons.Car /></div><span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Commute</span></div>
+                    <div className="space-y-4">{routes.map((route, i) => (<div key={i} className="flex justify-between items-end"><div><div className="text-3xl font-bold text-slate-800 leading-none tracking-tight">{durations[i] || '--'}</div><div className="text-xs text-slate-500 mt-1 font-bold uppercase">{route.label}</div></div><div className="text-[10px] text-slate-300 max-w-[80px] truncate text-right">{route.destination.split(',')[0]}</div></div>))}</div>
+                </div>
+            );
+        };
+
+        const Photos = ({ images, embedUrl }) => {
+            const [idx, setIdx] = useState(0);
+            useEffect(() => { if (!embedUrl) { const t = setInterval(() => setIdx(i => (i + 1) % images.length), 10000); return () => clearInterval(t); } }, [images, embedUrl]);
+            if (embedUrl) return <div className="card w-full h-full relative border-0 shadow-lg bg-black"><iframe src={embedUrl} className="w-full h-full border-none" scrolling="no" /></div>;
+            return <div className="card w-full h-full relative border-0 shadow-lg bg-slate-200"><img src={images[idx]} className="w-full h-full object-cover absolute inset-0 transition-opacity duration-1000" /></div>;
+        };
+
+        const GroceryList = ({ url }) => (
+            <div className="card h-full flex flex-col fade-in border-0 shadow-lg relative overflow-hidden">
+                {!url ? <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-slate-50"><div className="bg-emerald-100 p-4 rounded-full mb-4"><Icons.Cart /></div><h3 className="font-bold text-xl text-slate-800 mb-2">Synced Grocery List</h3><p className="text-slate-500 text-sm mb-6">Use OurGroceries or Todoist URL in Settings.</p></div> : <iframe src={url} className="w-full h-full border-none" />}
+            </div>
+        );
+
+        const ToDoWidget = () => {
+            const [todos, setTodos] = useState(() => JSON.parse(localStorage.getItem('parentTodos')) || [{ id: 1, text: 'Pay electric bill', done: false }]);
+            const [newTodo, setNewTodo] = useState("");
+            useEffect(() => localStorage.setItem('parentTodos', JSON.stringify(todos)), [todos]);
+            const addTodo = (e) => { e.preventDefault(); if (!newTodo.trim()) return; setTodos([...todos, { id: Date.now(), text: newTodo, done: false }]); setNewTodo(""); };
+            return (
+                <div className="card h-full flex flex-col fade-in border-0 shadow-lg">
+                    <div className="card-header bg-white pt-6 pb-4 border-b-0"><div className="flex items-center justify-between mb-4"><h3 className="font-bold text-2xl text-slate-800">To-Dos</h3></div><form onSubmit={addTodo} className="flex gap-2"><input className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 outline-none" placeholder="Add task..." value={newTodo} onChange={(e) => setNewTodo(e.target.value)} /><button type="submit" className="bg-blue-600 text-white px-5 py-2 rounded-xl font-bold">Add</button></form></div>
+                    <div className="p-6 space-y-3 overflow-y-auto flex-1 bg-slate-50/50">{todos.map(todo => (<div key={todo.id} className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><div onClick={() => setTodos(todos.map(t => t.id === todo.id ? { ...t, done: !t.done } : t))} className="flex items-center gap-3 flex-1 cursor-pointer"><div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${todo.done ? 'bg-green-500 border-green-500' : 'border-slate-300'}`}>{todo.done && <span className="text-white text-xs">✓</span>}</div><span className={todo.done ? 'text-slate-400 line-through' : 'text-slate-700'}>{todo.text}</span></div><button onClick={() => setTodos(todos.filter(t => t.id !== todo.id))} className="text-slate-300 hover:text-red-400">✕</button></div>))}</div>
+                </div>
+            );
+        };
+
+        const TaskList = ({ member, onUpdateScore }) => {
+            const tasks = member.tasks || [];
+            const percent = Math.min(100, (member.score / (member.goalTarget || 100)) * 100);
+            return (
+                <div className="card h-full flex flex-col fade-in border-0 shadow-lg">
+                    <div className="card-header bg-white pt-6 pb-4"><div className="flex justify-between items-center mb-4"><div className="flex items-center gap-3"><div className={`w-3 h-8 rounded-full ${member.color.split(' ')[0]}`}></div><div><h3 className="font-bold text-2xl text-slate-800">{member.name}'s Tasks</h3><div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Goal: {member.goalName}</div></div></div><div className="text-right"><span className="text-3xl font-bold text-slate-800">{member.score}</span><span className="text-sm text-slate-400 font-medium"> / {member.goalTarget}</span></div></div><div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden"><div className={`h-full progress-fill ${member.color.split(' ')[0]}`} style={{width: `${percent}%`}}></div></div></div>
+                    <div className="p-6 space-y-3 overflow-y-auto flex-1 bg-slate-50/50">{tasks.map(task => (<div key={task.id} className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-100 shadow-sm active:scale-[0.99] cursor-pointer" onClick={() => onUpdateScore(member.id, task.p)}><span className="text-lg font-medium text-slate-700">{task.t}</span><span className={`px-3 py-1 rounded-lg text-sm font-bold ${member.color}`}>+{task.p}</span></div>))}</div>
+                </div>
+            );
+        };
+
+        const CalendarView = ({ memberUrl, defaultUrl }) => {
+            const url = memberUrl || defaultUrl;
+            const src = url.match(/src="([^"]+)"/)?.[1] || "";
+            return (
+                <div className="card h-full flex flex-col fade-in border-0 shadow-lg">
+                    <div className="card-header bg-white py-4"><h3 className="font-bold text-xl text-slate-800 flex items-center gap-2"><Icons.Calendar /> Schedule</h3></div>
+                    <div className="flex-1 calendar-wrapper bg-white">{src ? <iframe src={src} scrolling="no" /> : <div className="h-full flex items-center justify-center text-slate-400">No Calendar Linked</div>}</div>
+                </div>
+            );
+        };
+
+        const AppleMusicPlayer = ({ playlists }) => {
+            const [activeUrl, setActiveUrl] = useState(playlists[0]?.url || "");
+            const getEmbedUrl = (url) => url ? url.replace("music.apple.com", "embed.music.apple.com") : "";
+            return (
+                <div className="card h-full flex flex-col p-6 bg-white border-2 border-pink-100 shadow-xl">
+                    <h3 className="text-pink-400 font-kids text-3xl mb-4 flex items-center gap-3 font-bold"><Icons.Music /> DJ Station</h3>
+                    <div className="flex-1 music-container bg-pink-50 rounded-2xl overflow-hidden shadow-inner mb-6 relative"><iframe src={getEmbedUrl(activeUrl)} width="100%" height="100%" allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" className="absolute inset-0"></iframe></div>
+                    <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">{playlists.map((pl, i) => (<button key={i} onClick={() => setActiveUrl(pl.url)} className={`flex-1 min-w-[120px] py-4 px-4 rounded-xl font-kids text-lg font-bold shadow-md ${activeUrl === pl.url ? 'bg-pink-500 text-white ring-4 ring-pink-200' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}>{pl.name}</button>))}</div>
+                </div>
+            );
+        };
+
+        const JokeWidget = () => {
+            const [joke, setJoke] = useState(null);
+            const [showPunchline, setShowPunchline] = useState(false);
+            const fetchJoke = async () => { setShowPunchline(false); try { const res = await fetch('https://official-joke-api.appspot.com/jokes/random'); const data = await res.json(); setJoke(data); } catch (e) { setJoke({ setup: "Why did the chicken cross?", punchline: "To get to the other side!" }); } };
+            useEffect(() => { fetchJoke(); }, []);
+            return (
+                <div onClick={() => showPunchline ? fetchJoke() : setShowPunchline(true)} className="card p-8 h-full flex flex-col items-center justify-center text-center cursor-pointer relative bg-gradient-to-br from-indigo-50 to-purple-50 hover:shadow-xl transition border-2 border-purple-100 select-none">
+                    <div className="absolute top-6 left-6 text-purple-400 text-sm font-bold uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full flex items-center gap-1"><Icons.Smile /> Joke of the Day</div>
+                    {joke ? (<div className="mt-8 flex flex-col items-center justify-center h-full w-full"><div className="font-kids text-4xl text-slate-800 mb-8 leading-snug font-bold max-w-md">{joke.setup}</div>{showPunchline ? <div className="font-kids text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600 animate-pop leading-tight drop-shadow-sm">{joke.punchline}<div className="text-sm font-sans font-medium text-slate-400 mt-6 opacity-60">(Tap for another)</div></div> : <button className="bg-purple-500 text-white px-8 py-3 rounded-full text-xl font-bold shadow-lg shadow-purple-200 hover:bg-purple-600 transition transform hover:-translate-y-1">Tap for Answer</button>}</div>) : <div className="animate-pulse text-2xl font-kids text-slate-300">Finding a good one...</div>}
+                </div>
+            );
+        };
+
+        const Countdown = ({ targetDate, title }) => {
+            const [timeLeft, setTimeLeft] = useState("");
+            useEffect(() => { const calc = () => { const diff = new Date(targetDate).getTime() - new Date().getTime(); setTimeLeft(diff < 0 ? "Hooray!" : `${Math.floor(diff / (1000 * 60 * 60 * 24))} Days`); }; calc(); }, [targetDate]);
+            return (
+                <div className="card px-8 flex flex-row items-center justify-between h-full bg-blue-50 border-2 border-blue-100 shadow-md">
+                    <div className="flex items-center gap-4"><div className="bg-blue-200 p-2 rounded-lg text-blue-700"><Icons.Calendar /></div><div><div className="text-blue-400 uppercase tracking-widest text-xs font-bold">Countdown</div><div className="font-kids text-2xl text-blue-900 font-bold">{title}</div></div></div><div className="font-kids text-5xl font-extrabold text-blue-500">{timeLeft}</div>
+                </div>
+            );
+        };
+
+        // --- SETTINGS ---
+        const Settings = ({ isOpen, onClose, config, onSave }) => {
+            const [temp, setTemp] = useState(config);
+            if(!isOpen) return null;
+            const handleFamily = (idx, field, val) => { const fam = [...temp.family]; fam[idx][field] = val; setTemp({...temp, family: fam}); };
+            const handlePlaylist = (idx, field, val) => { const pl = [...temp.playlists]; pl[idx][field] = val; setTemp({...temp, playlists: pl}); };
+            const handleKennedySchedule = (dayIdx, iconName) => {
+                const sched = [...temp.kennedySchedule];
+                const currentIcons = Array.isArray(sched[dayIdx].icon) ? sched[dayIdx].icon : [sched[dayIdx].icon];
+                sched[dayIdx].icon = currentIcons.includes(iconName) ? currentIcons.filter(i => i !== iconName) : [...currentIcons, iconName];
+                setTemp({...temp, kennedySchedule: sched});
+            };
+            const iconOptions = ['Home', 'School', 'YMCA', 'Playdate', 'Park', 'Iceskating'];
+
+            return (
+                <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
+                    <div className="bg-white w-[700px] max-h-[85vh] rounded-2xl shadow-2xl flex flex-col">
+                        <div className="p-6 border-b border-slate-100 flex justify-between"><h2 className="text-2xl font-bold">Settings</h2><button onClick={onClose}>✕</button></div>
+                        <div className="flex-1 overflow-y-auto p-6 space-y-8 text-slate-800">
+                             <section><h3 className="text-slate-400 uppercase text-xs font-bold mb-4">Kennedy's Calendar</h3><div className="space-y-4">{temp.kennedySchedule.map((day, i) => (<div key={i} className="bg-slate-50 p-3 rounded-xl border border-slate-200"><div className="font-bold text-sm mb-2">{day.day}</div><div className="flex flex-wrap gap-2">{iconOptions.map(opt => <button key={opt} onClick={() => handleKennedySchedule(i, opt)} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${(Array.isArray(day.icon) ? day.icon : [day.icon]).includes(opt) ? 'bg-blue-500 text-white shadow-md' : 'bg-white text-slate-500 border border-slate-200'}`}>{opt}</button>)}</div></div>))}</div></section>
+                             <section><h3 className="text-slate-400 uppercase text-xs font-bold mb-4">Family & Rewards</h3>{temp.family.map((mem, i) => (<div key={i} className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4"><div className="flex gap-4 mb-3"><input className="bg-white p-2 rounded w-1/3 border border-slate-200 font-bold" value={mem.name} onChange={e => handleFamily(i, 'name', e.target.value)} />{mem.type === 'kid' ? <><input className="bg-white p-2 rounded flex-1 border border-slate-200 text-sm" placeholder="Reward Goal" value={mem.goalName || ''} onChange={e => handleFamily(i, 'goalName', e.target.value)} /><input className="bg-white p-2 rounded w-20 border border-slate-200 text-sm" type="number" placeholder="Target" value={mem.goalTarget || ''} onChange={e => handleFamily(i, 'goalTarget', e.target.value)} /></> : <div className="flex-1 text-xs text-slate-400 flex items-center px-2 italic">Parent Mode</div>}</div><input className="w-full bg-white p-2 rounded text-xs font-mono border border-slate-200 text-slate-500" placeholder="Calendar Embed Code" value={mem.calendarUrl || ''} onChange={e => handleFamily(i, 'calendarUrl', e.target.value)} /></div>))}</section>
+                             <section><h3 className="text-slate-400 uppercase text-xs font-bold mb-4">System</h3><div className="space-y-4"><input className="w-full bg-slate-50 p-3 rounded border border-slate-200 text-xs" placeholder="Traffic API Key" value={temp.traffic.apiKey} onChange={e => setTemp({...temp, traffic: {...temp.traffic, apiKey: e.target.value}})} /><input className="w-full bg-slate-50 p-3 rounded border border-slate-200" placeholder="Grocery List URL" value={temp.groceryUrl || ''} onChange={e => setTemp({...temp, groceryUrl: e.target.value})} /></div></section>
+                        </div>
+                        <div className="p-6 border-t border-slate-100 flex justify-end gap-3"><button onClick={onClose} className="px-6 py-2 text-slate-400">Cancel</button><button onClick={() => onSave(temp)} className="px-6 py-2 bg-slate-800 text-white rounded-lg font-bold">Save</button></div>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- MAIN APP ---
+        function App() {
+            const [page, setPage] = useState(0); 
+            const [selectedMemberIdx, setSelectedMemberIdx] = useState(null); 
+            const [showSettings, setShowSettings] = useState(false);
+            const [showStickerDrawer, setShowStickerDrawer] = useState(false);
+            const [quickNote, setQuickNote] = useState(() => localStorage.getItem('dashQuickNote') || "Don't forget milk!");
+            
+            // Sticker State
+            const [stickers, setStickers] = useState(() => {
+                const s = localStorage.getItem('dashStickers');
+                return s ? JSON.parse(s) : [];
+            });
+
+            const touchStart = useRef(null);
+            
+            const [config, setConfig] = useState(() => {
+                try { const s = localStorage.getItem('dashConfigV26'); return s ? JSON.parse(s) : DEFAULT_CONFIG; } catch(e) { return DEFAULT_CONFIG; }
+            });
+
+            useEffect(() => localStorage.setItem('dashStickers', JSON.stringify(stickers)), [stickers]);
+
+            const addSticker = (sticker) => {
+                const newSticker = {
+                    id: Date.now(),
+                    ...sticker,
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2
+                };
+                setStickers([...stickers, newSticker]);
+                setShowStickerDrawer(false);
+            };
+
+            const updateSticker = (id, x, y) => {
+                setStickers(stickers.map(s => s.id === id ? { ...s, x, y } : s));
+            };
+
+            const removeSticker = (id) => {
+                setStickers(stickers.filter(s => s.id !== id));
+            };
+
+            const onTouchEnd = (e) => {
+                if (!touchStart.current) return;
+                const dist = touchStart.current - e.changedTouches[0].clientX;
+                if (dist > 50 && page < 4) setPage(page + 1);
+                if (dist < -50 && page > 0) setPage(page - 1);
+                touchStart.current = null;
+            };
+
+            const handleScore = (memId, delta) => {
+                const newFam = config.family.map(m => m.id === memId ? { ...m, score: m.score + delta } : m);
+                const newConfig = { ...config, family: newFam };
+                setConfig(newConfig);
+                localStorage.setItem('dashConfigV26', JSON.stringify(newConfig));
+            };
+
+            const saveConfig = (newConf) => {
+                setConfig(newConf);
+                localStorage.setItem('dashConfigV26', JSON.stringify(newConf));
+                setShowSettings(false);
+            }
+
+            const toggleFullScreen = () => { if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } else { if (document.exitFullscreen) { document.exitFullscreen(); } } };
+
+            return (
+                <div className="h-screen w-screen relative select-none bg-[#fdfbf7]" onTouchStart={e => touchStart.current = e.touches[0].clientX} onTouchEnd={onTouchEnd}>
+                    {/* Sticker Layer */}
+                    <StickerLayer stickers={stickers} onUpdate={updateSticker} onRemove={removeSticker} />
+
+                    {/* UPDATED HEADER: Gradient background for readability if overlap occurs */}
+                    <div className="absolute top-0 left-0 w-full p-8 flex justify-between items-start pointer-events-none z-40 bg-gradient-to-b from-white/80 to-transparent pb-16"><Clock /><Weather lat={config.weather.lat} lon={config.weather.lon} /></div>
+                    
+                    <button onClick={toggleFullScreen} className="absolute top-6 right-6 p-3 bg-white rounded-full text-slate-400 hover:text-slate-800 z-50 transition shadow-lg"><Icons.Maximize /></button>
+                    <button onClick={() => setShowSettings(true)} className="absolute bottom-6 right-6 p-3 bg-white rounded-full text-slate-400 hover:text-slate-800 z-50 transition shadow-lg"><Icons.Settings /></button>
+                    
+                    {/* Sticker Drawer Button */}
+                    <button onClick={() => setShowStickerDrawer(!showStickerDrawer)} className="absolute bottom-6 right-24 p-3 bg-yellow-400 text-yellow-900 rounded-full hover:bg-yellow-300 z-50 transition shadow-lg hover:scale-110 active:scale-95"><Icons.Star /></button>
+
+                    <div className="flex h-full w-[500vw] page-container" style={{ transform: `translateX(-${page * 20}%)` }}>
+                        
+                        {/* PAGE 1: GLANCE (UPDATED PADDING PT-48) */}
+                        <div className="w-screen h-full p-8 pt-48 grid grid-cols-12 grid-rows-6 gap-6">
+                            <div className="col-span-8 row-span-6 rounded-3xl overflow-hidden shadow-xl border-4 border-white"><Photos images={config.photos} embedUrl={config.photoEmbedUrl} /></div>
+                            <div className="col-span-4 row-span-2"><Traffic apiKey={config.traffic.apiKey} routes={config.traffic.routes} /></div>
+                            <div className="col-span-4 row-span-4"><div className="card h-full p-6 flex flex-col"><div className="text-slate-400 text-xs font-bold uppercase mb-4 tracking-wider">Up Next</div><div className="flex-1 -mx-4 mb-4 relative">{config.calendar.embedCode ? <iframe src={config.calendar.embedCode.match(/src="([^"]+)"/)?.[1] + "&mode=AGENDA&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23ffffff"} className="w-full h-full border-none" scrolling="no" /> : <div className="p-4 text-slate-400">No Calendar</div>}</div><div className="mt-auto pt-4 border-t border-slate-100"><div className="text-xs text-slate-400 mb-2 font-bold uppercase">Quick Note</div><input className="font-hand text-2xl text-slate-600 bg-transparent w-full border-none focus:outline-none placeholder-slate-300" value={quickNote} onChange={(e) => { setQuickNote(e.target.value); localStorage.setItem('dashQuickNote', e.target.value); }} placeholder="Type note here..." /></div></div></div>
+                        </div>
+
+                        {/* PAGE 2: HUB (UPDATED PADDING PT-48) */}
+                        <div className="w-screen h-full p-8 pt-48 grid grid-cols-12 grid-rows-12 gap-6">
+                            <div className="col-span-12 row-span-1 flex gap-4 overflow-x-auto pb-2 no-scrollbar"><button onClick={() => setSelectedMemberIdx(null)} className={`px-8 py-3 rounded-full font-bold text-lg transition shadow-sm ${selectedMemberIdx === null ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border border-slate-200'}`}>Family Overview</button>{config.family.map((mem, i) => ( <button key={i} onClick={() => setSelectedMemberIdx(i)} className={`px-6 py-3 rounded-full font-bold text-lg transition shadow-sm flex items-center gap-2 ${selectedMemberIdx === i ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border border-slate-200'}`}><div className={`w-3 h-3 rounded-full ${mem.color.split(' ')[0]}`}></div>{mem.name}</button> ))}</div>
+                            <div className="col-span-7 row-span-11"><CalendarView memberUrl={selectedMemberIdx !== null ? config.family[selectedMemberIdx].calendarUrl : null} defaultUrl={config.calendar.embedCode} /></div>
+                            <div className="col-span-5 row-span-11">{selectedMemberIdx !== null ? (config.family[selectedMemberIdx].type === 'parent' ? <ToDoWidget /> : <TaskList member={config.family[selectedMemberIdx]} onUpdateScore={handleScore} />) : (<div className="card h-full p-6 flex flex-col border-0 shadow-lg"><div className="card-header bg-white border-none p-0 mb-6"><h3 className="font-bold text-2xl text-slate-800">Weekly Progress</h3></div><div className="space-y-4 overflow-y-auto">{config.family.filter(m => m.type === 'kid').map(mem => (<div key={mem.id} className={`p-5 rounded-2xl border flex items-center justify-between ${mem.color}`}><div className="flex items-center gap-4"><div className="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center font-bold text-slate-700 shadow-sm">{mem.name[0]}</div><div><div className="font-bold text-lg">{mem.name}</div><div className="text-xs opacity-70 font-bold uppercase">{mem.score} Points</div></div></div></div>))}</div></div>)}</div>
+                        </div>
+
+                        {/* PAGE 3: KENNEDY'S CALENDAR (UPDATED PADDING PT-48) */}
+                        <div className="w-screen h-full p-8 pt-48 grid grid-cols-12 gap-6"><div className="col-span-12 h-full"><KennedyCalendar schedule={config.kennedySchedule} /></div></div>
+
+                        {/* PAGE 4: KIDS ZONE (UPDATED PADDING PT-48) */}
+                        <div className="w-screen h-full p-8 pt-48 grid grid-cols-12 grid-rows-12 gap-6"><div className="col-span-12 row-span-1"><h2 className="font-kids text-4xl text-slate-800 font-extrabold flex items-center gap-3"><span className="text-yellow-400">✨</span> Kids Zone</h2></div><div className="col-span-7 row-span-11 flex flex-col gap-6"><div className="flex-1"><AppleMusicPlayer playlists={config.playlists} /></div></div><div className="col-span-5 row-span-11 flex flex-col gap-6"><div className="flex-1"><JokeWidget /></div><div className="h-32"><Countdown targetDate={config.countdown.date} title={config.countdown.title} /></div></div></div>
+
+                        {/* PAGE 5: UTILITY (UPDATED PADDING PT-48) */}
+                        <div className="w-screen h-full p-8 pt-48 grid grid-cols-12 gap-6"><div className="col-span-8 h-full"><GroceryList url={config.groceryUrl} /></div><div className="col-span-4 h-full flex flex-col gap-6"><div className="flex-1"><TimerWidget /></div></div></div>
+                        
+                    </div>
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-50 bg-white/80 px-6 py-3 rounded-full backdrop-blur-md border border-slate-200 shadow-lg">{[0, 1, 2, 3, 4].map(i => <button key={i} onClick={() => setPage(i)} className={`w-3 h-3 rounded-full transition-all ${page === i ? 'bg-slate-800 scale-125' : 'bg-slate-300'}`} />)}</div>
+                    
+                    <StickerDrawer isOpen={showStickerDrawer} onClose={() => setShowStickerDrawer(false)} onAdd={addSticker} />
+                    <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} config={config} onSave={saveConfig} />
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
