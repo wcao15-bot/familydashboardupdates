@@ -35,7 +35,7 @@
         .animate-float { animation: float 3s ease-in-out infinite; }
         @keyframes pulse-red { 0%, 100% { background-color: #ef4444; } 50% { background-color: #b91c1c; } }
         .animate-alarm { animation: pulse-red 1s infinite; }
-      
+       
         /* Apple Music */
         .music-container iframe { border-radius: 16px; border: none; }
         
@@ -78,23 +78,57 @@
 
         const FunIcons = {
             Home: ({className}) => (
-    <img src="./images/home.png" className={className} alt="Home" />
-),
+                <svg className={className} viewBox="0 0 24 24" fill="none">
+                    <path d="M3 10L12 3L21 10V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V10Z" fill="#3B82F6"/>
+                    <path d="M2 10L12 2L22 10" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M9 22V12H15V22" fill="#93C5FD" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+            ),
             School: ({className}) => (
-    <img src="./images/school-bus.png" className={className} alt="School" />
-),
+                <svg className={className} viewBox="0 0 24 24" fill="none">
+                    <path d="M4 16H20" stroke="#F59E0B" strokeWidth="14" strokeLinecap="round"/>
+                    <path d="M4 16H20" stroke="#FCD34D" strokeWidth="10" strokeLinecap="round"/>
+                    <circle cx="6" cy="20" r="2.5" fill="#1F2937" stroke="#374151" strokeWidth="1"/>
+                    <circle cx="18" cy="20" r="2.5" fill="#1F2937" stroke="#374151" strokeWidth="1"/>
+                    <path d="M2 16L2 12C2 9 4 9 4 9H18" stroke="#F59E0B" strokeWidth="2"/>
+                    <rect x="5" y="11" width="3" height="3" fill="#93C5FD" rx="0.5"/>
+                    <rect x="9" y="11" width="3" height="3" fill="#93C5FD" rx="0.5"/>
+                    <rect x="13" y="11" width="3" height="3" fill="#93C5FD" rx="0.5"/>
+                </svg>
+            ),
             YMCA: ({className}) => (
-    <img src="./images/y.png" className={className} alt="YMCA" />
-),
+                <svg className={className} viewBox="0 0 24 24" fill="none">
+                    <text x="50%" y="50%" textAnchor="middle" dy=".35em" fontSize="20" fontWeight="900" fill="#DC2626" stroke="#991B1B" strokeWidth="1">Y</text>
+                </svg>
+            ),
             Park: ({className}) => (
-    <img src="./images/park.png" className={className} alt="Park" />
-),
+                <svg className={className} viewBox="0 0 24 24" fill="none">
+                    <path d="M12 22V12" stroke="#92400E" strokeWidth="4" strokeLinecap="round"/>
+                    <path d="M12 18L7 12L12 6L17 12L12 18Z" fill="#4ADE80" stroke="#166534" strokeWidth="2" strokeLinejoin="round"/>
+                    <circle cx="12" cy="7" r="5" fill="#22C55E" stroke="#166534" strokeWidth="2"/>
+                    <path d="M18 6L21 3" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round"/>
+                    <circle cx="20" cy="4" r="1.5" fill="#F59E0B"/>
+                </svg>
+            ),
             Playdate: ({className}) => (
-    <img src="./images/playdate.png" className={className} alt="Playdate" />
-),
+                <svg className={className} viewBox="0 0 24 24" fill="none">
+                    <circle cx="8" cy="12" r="6" fill="#F472B6"/>
+                    <circle cx="16" cy="12" r="6" fill="#C084FC"/>
+                    <path d="M6 11H10" stroke="#831843" strokeWidth="1.5" strokeLinecap="round"/>
+                    <path d="M14 11H18" stroke="#581C87" strokeWidth="1.5" strokeLinecap="round"/>
+                    <path d="M8 14C8 14 9 15 10 14" stroke="#831843" strokeWidth="1.5" strokeLinecap="round"/>
+                    <path d="M16 14C16 14 17 15 18 14" stroke="#581C87" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+            ),
             Iceskating: ({className}) => (
-    <img src="./images/ice skate.png" className={className} alt="Ice Skating" />
-),
+                <svg className={className} viewBox="0 0 24 24" fill="none">
+                    <path d="M12 3v18M3 12h18" stroke="#BFDBFE" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M7 7l10 10M7 17L17 7" stroke="#BFDBFE" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M6 18L9 21H15" stroke="#1E40AF" strokeWidth="2" strokeLinecap="round"/>
+                    <circle cx="12" cy="12" r="2" fill="white" />
+                </svg>
+            )
+        };
 
         const DEFAULT_CONFIG = {
             weather: { lat: '37.33', lon: '-121.88' },
@@ -139,7 +173,15 @@
                 }
             ],
             kennedySchedule: [
-                { day: 'Sunday', icon: ['Home'] }, { day: 'Monday', icon: ['Home', 'Iceskating'] }, { day: 'Tuesday', icon: ['School'] }, { day: 'Wednesday', icon: ['School'] }, { day: 'Thursday', icon: ['School'] }, { day: 'Friday', icon: ['School'] }, { day: 'Saturday', icon: ['YMCA'] }
+                // EXAMPLE CHANGE: Using your image for Sunday
+                { day: 'Sunday', icon: ['./images/home.png'] }, 
+                
+                { day: 'Monday', icon: ['./images/home.png', ''./images/ice skate.png''] }, 
+                { day: 'Tuesday', icon: ['./images/school-bus.png'] }, 
+                { day: 'Wednesday', icon: ['./images/school-bus.png'] }, 
+                { day: 'Thursday', icon: ['./images/school-bus.png'] }, 
+                { day: 'Friday', icon: ['./images/school-bus.png'] }, 
+                { day: 'Saturday', icon: ['./images/y.png'] }
             ]
         };
 
@@ -252,7 +294,7 @@
                 
                 // If the type looks like a file path (contains '.' or '/'), treat it as an image
                 if (type.includes('.') || type.includes('/')) {
-                     return <img src={type} className={`${size} object-contain transition hover:scale-110 drop-shadow-md`} alt="icon" />;
+                      return <img src={type} className={`${size} object-contain transition hover:scale-110 drop-shadow-md`} alt="icon" />;
                 }
 
                 if (FunIcons[type]) return React.createElement(FunIcons[type], props);
