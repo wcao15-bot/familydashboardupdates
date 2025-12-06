@@ -160,7 +160,7 @@
             photos: [ 
                 './images/family01.jpg'
             ],
-            countdown: { title: 'Christmas Break', date: '2025-12-25' },
+            countdown: { title: 'Christmas', date: '2025-12-25' },
             playlists: [
                 { name: "Hits", url: "https://music.apple.com/us/playlist/todays-hits/pl.f4d106fed2bd41149aaacabb233eb5eb" },
                 { name: "Kennedys Fav", url: "https://music.apple.com/us/playlist/kennedy-taylor/pl.u-e98lkKLiDVm3B" },
@@ -770,11 +770,12 @@
                     {/* UPDATED HEADER: Gradient background for readability if overlap occurs */}
                     <div className="absolute top-0 left-0 w-full p-8 flex justify-between items-start pointer-events-none z-40 bg-gradient-to-b from-white/80 to-transparent pb-16"><Clock /><Weather lat={config.weather.lat} lon={config.weather.lon} /></div>
                     
-                    <button onClick={toggleFullScreen} className="absolute top-6 right-6 p-3 bg-white rounded-full text-slate-400 hover:text-slate-800 z-50 transition shadow-lg"><Icons.Maximize /></button>
-                    <button onClick={() => setShowSettings(true)} className="absolute bottom-6 right-6 p-3 bg-white rounded-full text-slate-400 hover:text-slate-800 z-50 transition shadow-lg"><Icons.Settings /></button>
-                    
-                    {/* Sticker Drawer Button */}
-                    <button onClick={() => setShowStickerDrawer(!showStickerDrawer)} className="absolute bottom-6 right-24 p-3 bg-yellow-400 text-yellow-900 rounded-full hover:bg-yellow-300 z-50 transition shadow-lg hover:scale-110 active:scale-95"><Icons.Star /></button>
+                    {/* Controls moved to bottom right */}
+                    <div className="absolute bottom-6 right-6 flex gap-4 z-50">
+                        <button onClick={() => setShowStickerDrawer(!showStickerDrawer)} className="p-3 bg-yellow-400 text-yellow-900 rounded-full hover:bg-yellow-300 transition shadow-lg hover:scale-110 active:scale-95"><Icons.Star /></button>
+                        <button onClick={toggleFullScreen} className="p-3 bg-white rounded-full text-slate-400 hover:text-slate-800 transition shadow-lg"><Icons.Maximize /></button>
+                        <button onClick={() => setShowSettings(true)} className="p-3 bg-white rounded-full text-slate-400 hover:text-slate-800 transition shadow-lg"><Icons.Settings /></button>
+                    </div>
 
                     <div className="flex h-full w-[500vw] page-container" style={{ transform: `translateX(-${page * 20}%)` }}>
                         
