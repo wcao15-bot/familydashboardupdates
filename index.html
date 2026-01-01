@@ -174,17 +174,17 @@
                 { id: 1, name: 'Mom', type: 'parent', color: 'bg-rose-100 text-rose-800', calendarUrl: '<iframe src="https://calendar.google.com/calendar/embed?src=wcao15%40gmail.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>' },
                 { id: 2, name: 'Dad', type: 'parent', color: 'bg-red-100 text-red-800', calendarUrl: '<iframe src="https://calendar.google.com/calendar/embed?src=293461028493f9e92d119f60881d821fcc04438660ab8e1df41c10f993a7ae33%40group.calendar.google.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>' },
                 { 
-                    id: 3, name: 'Lincoln', type: 'kid', score: 240, goalName: 'Minecraft Hour', goalTarget: 300, color: 'bg-orange-100 text-orange-800', 
+                    id: 3, name: 'Lincoln', type: 'kid', score: 0, goalName: 'Minecraft Hour', goalTarget: 300, color: 'bg-orange-100 text-orange-800', 
                     calendarUrl: '<iframe src="https://calendar.google.com/calendar/embed?src=ef1e1535f8d35d26cc62e18aca5486d844a2c377ecf6b76707db532cd2ecf1bb%40group.calendar.google.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>', 
                     inventory: [], placedStickers: [], 
-                    tasks: [ { id: 'l1', t: "Make Bed", p: 2 }, { id: 'l2', t: "Cups/Dishes to Sink", p: 5 }, { id: 'l3', t: "Homework", p: 5 }, { id: 'l4', t: "Brush Teeth", p: 5 }, { id: 'l5', t: "Put Clothes Away", p: 5 } ],
+                    tasks: [ { id: 'l1', t: "Make Bed", p: 2, maxRepeats: 1, completedCount: 0 }, { id: 'l2', t: "Cups/Dishes to Sink", p: 3, maxRepeats: 3, completedCount: 0 }, { id: 'l3', t: "Homework", p: 5, maxRepeats: 1, completedCount: 0 }, { id: 'l4', t: "Brush Teeth", p: 3, maxRepeats: 2, completedCount: 0 }, { id: 'l5', t: "Put Clothes Away", p: 3, maxRepeats: 2, completedCount: 0 } ],
                     shopItems: generatePokemonShop()
                 },
                 { 
-                    id: 4, name: 'Kennedy', type: 'kid', score: 190, goalName: 'Paint Nails 💅', goalTarget: 250, color: 'bg-purple-100 text-purple-800', 
+                    id: 4, name: 'Kennedy', type: 'kid', score: 0, goalName: 'Paint Nails 💅', goalTarget: 250, color: 'bg-purple-100 text-purple-800', 
                     calendarUrl: '<iframe src="https://calendar.google.com/calendar/embed?src=b84c8d3ee486a31bd35071209cf05d5abea7704c59fb039d572c082b4ded8919%40group.calendar.google.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>', 
                     inventory: [], placedStickers: [], 
-                    tasks: [ { id: 'k1', t: "Make Bed", p: 2 }, { id: 'k2', t: "Cups/Dishes to Sink", p: 5 }, { id: 'k3', t: "Workbook", p: 5 }, { id: 'k4', t: "Brush Teeth", p: 5 }, { id: 'k5', t: "Put Clothes Away", p: 5 } ],
+                    tasks: [ { id: 'k1', t: "Make Bed", p: 2, maxRepeats: 1, completedCount: 0 }, { id: 'k2', t: "Cups/Dishes to Sink", p: 3, maxRepeats: 3, completedCount: 0 }, { id: 'k3', t: "Workbook", p: 5, maxRepeats: 1, completedCount: 0 }, { id: 'k4', t: "Brush Teeth", p: 3, maxRepeats: 2, completedCount: 0 }, { id: 'k5', t: "Put Clothes Away", p: 3, maxRepeats: 2, completedCount: 0 } ],
                     shopItems: [
                         { id: 'k1', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F380.svg', price: 10, name: 'Bow' },
                         { id: 'k2', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F338.svg', price: 15, name: 'Flower' },
@@ -306,23 +306,40 @@
             const getPlaced = () => member.placedStickers || [];
 
             const handleToggleTask = (task) => {
-                const isNowDone = !task.isCompleted;
+                const repeats = task.maxRepeats || 1;
+                const current = task.completedCount || 0;
+                let newCount = current;
+                let newScore = member.score;
+                let isComplete = task.isCompleted;
+
+                // Logic: 
+                // If not complete: Increment count. If count >= repeats, mark complete. Add points.
+                // If complete: Reset count to 0. Mark incomplete. Subtract points earned today (repeats * p).
                 
-                // If making it done, check daily logic
-                if (isNowDone) {
+                if (!task.isCompleted) {
+                    newCount = current + 1;
+                    newScore += task.p;
                     playCelebrationSound();
                     triggerConfetti();
+                    if (newCount >= repeats) {
+                        isComplete = true;
+                    }
+                } else {
+                    // Resetting a completed task
+                    newScore = Math.max(0, newScore - (task.p * repeats));
+                    newCount = 0;
+                    isComplete = false;
                 }
 
                 const updatedTask = { 
                     ...task, 
-                    isCompleted: isNowDone, 
-                    lastCompleted: isNowDone ? new Date().toISOString() : null 
+                    isCompleted: isComplete, 
+                    completedCount: newCount,
+                    lastCompleted: isComplete ? new Date().toISOString() : task.lastCompleted 
                 };
 
                 const newTasks = member.tasks.map(t => t.id === task.id ? updatedTask : t);
-                const scoreDelta = isNowDone ? task.p : -task.p;
-                onUpdate({ ...member, tasks: newTasks, score: Math.max(0, member.score + scoreDelta) });
+                onUpdate({ ...member, tasks: newTasks, score: newScore });
             };
 
             const buySticker = (item) => {
@@ -349,14 +366,7 @@
             };
 
             const placeSticker = (stickerId, x, y) => {
-                const sticker = getInventory().find(s => s.id === stickerId); // Simplified finding logic (assuming uniqueId)
-                // In real app we might want to track specific instances, but let's just clone details
-                // Correct logic: we need to find the specific item in inventory if we drag from inventory bar
-                // But the drag only passes ID. Let's find first matching item type.
-                // Or better: pass the uniqueId in drag.
-                // For simplicity here, we assume if you have one, you can place one (cloning it to board doesn't remove from inventory in this simple version, or does it?
-                // Typically you buy once, place multiple? Or buy one, place one? 
-                // Let's assume buy once, place multiple for now to be kid friendly, unless user wants "consumable" stickers.
+                const sticker = getInventory().find(s => s.id === stickerId); 
                 if (sticker) {
                     const newPlaced = [...getPlaced(), { uid: Date.now(), type: sticker.type, content: sticker.content, x, y }];
                     onUpdate({ ...member, placedStickers: newPlaced });
@@ -374,11 +384,9 @@
                 const x = ((e.clientX - rect.left) / rect.width) * 100;
                 const y = ((e.clientY - rect.top) / rect.height) * 100;
                 const sId = e.dataTransfer.getData("sid");
-                // Handle different ID types (string vs number)
                 if (sId) placeSticker(sId, x, y);
             };
 
-            // Touch support for placing stickers
             const handleBoardTouch = (e) => {
                 if(selectedSticker && boardRef.current) {
                     const rect = boardRef.current.getBoundingClientRect();
@@ -415,17 +423,26 @@
                                 {member.tasks.map(task => (
                                     <div key={task.id} className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all ${task.isCompleted ? 'bg-green-50 border-green-200 opacity-60' : 'bg-white border-white hover:border-indigo-200'}`}>
                                         <div className="flex items-center gap-3">
-                                            <button onClick={() => handleToggleTask(task)} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${task.isCompleted ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-300'}`}>
-                                                {task.isCompleted ? <Icons.CheckCircle2 /> : <Icons.Circle />}
+                                            <button onClick={() => handleToggleTask(task)} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${task.isCompleted ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-300'}`}>
+                                                {task.isCompleted ? <Icons.CheckCircle2 /> : (task.maxRepeats > 1 ? <span className="font-bold text-xs text-slate-500">{task.completedCount || 0}/{task.maxRepeats}</span> : <Icons.Circle />)}
                                             </button>
                                             <div>
                                                 <div className={`font-bold ${task.isCompleted ? 'line-through text-slate-400' : 'text-slate-700'}`}>{task.t}</div>
-                                                {task.isDaily && <div className="flex items-center gap-1 text-[10px] text-orange-400 font-bold uppercase"><Icons.Repeat size={10}/> Daily</div>}
+                                                {(task.maxRepeats > 1 || task.isDaily) && <div className="flex items-center gap-1 text-[10px] text-orange-400 font-bold uppercase"><Icons.Repeat size={10}/> {task.maxRepeats > 1 ? `${task.maxRepeats}x Daily` : 'Daily'}</div>}
                                             </div>
                                         </div>
                                         <div className="text-xs font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-full">+{task.p}</div>
                                     </div>
                                 ))}
+                                
+                                {/* Correction Controls */}
+                                <div className="mt-8 pt-6 border-t border-slate-200">
+                                    <h4 className="text-xs font-bold text-slate-400 uppercase mb-3">Parent Controls</h4>
+                                    <div className="flex gap-3">
+                                        <button onClick={() => onUpdate({...member, score: Math.max(0, member.score - 10)})} className="px-4 py-2 bg-red-50 text-red-500 rounded-lg text-xs font-bold border border-red-100 hover:bg-red-100 transition">Undo (-10)</button>
+                                        <button onClick={() => onUpdate({...member, score: 0})} className="px-4 py-2 bg-slate-100 text-slate-500 rounded-lg text-xs font-bold border border-slate-200 hover:bg-slate-200 transition">Reset Score</button>
+                                    </div>
+                                </div>
                             </div>
                         )}
 
@@ -656,7 +673,10 @@
                                                              <div key={tIdx} className="flex gap-2 mb-2 items-center">
                                                                  <input className="bg-white p-2 rounded flex-1 border border-slate-200 text-sm" value={task.t} onChange={(e) => handleTaskChange(i, tIdx, 't', e.target.value)} />
                                                                  <input type="number" className="bg-white p-2 rounded w-16 border border-slate-200 text-sm text-center" value={task.p} onChange={(e) => handleTaskChange(i, tIdx, 'p', e.target.value)} />
-                                                                 <button onClick={() => handleToggleDaily(i, tIdx)} className={`px-2 py-1 rounded text-xs font-bold ${task.isDaily ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-400'}`}>{task.isDaily ? 'Daily' : 'Once'}</button>
+                                                                 <div className="flex items-center gap-2">
+                                                                    <span className="text-[10px] font-bold text-slate-400">x/Day:</span>
+                                                                    <input type="number" min="1" className="bg-white p-2 rounded w-14 border border-slate-200 text-sm text-center" value={task.maxRepeats || 1} onChange={(e) => handleTaskChange(i, tIdx, 'maxRepeats', e.target.value)} />
+                                                                 </div>
                                                                  <button onClick={() => handleDeleteTask(i, tIdx)} className="text-red-400 hover:text-red-600 font-bold px-2">✕</button>
                                                              </div>
                                                         ))}
@@ -745,8 +765,8 @@
             const touchStart = useRef(null);
             
             const [config, setConfig] = useState(() => {
-                // Versioning to force new schema update (V36 for Photo Source Input)
-                try { const s = localStorage.getItem('dashConfigV36'); return s ? JSON.parse(s) : DEFAULT_CONFIG; } catch(e) { return DEFAULT_CONFIG; }
+                // Versioning to force new schema update (V37 for Max Repeats)
+                try { const s = localStorage.getItem('dashConfigV37'); return s ? JSON.parse(s) : DEFAULT_CONFIG; } catch(e) { return DEFAULT_CONFIG; }
             });
 
             useEffect(() => {
@@ -756,21 +776,24 @@
                     if (mem.type !== 'kid' || !mem.tasks) return mem;
                     let changed = false;
                     const newTasks = mem.tasks.map(t => {
-                        if (t.isDaily && t.isCompleted && t.lastCompleted) {
-                            const lastDate = new Date(t.lastCompleted).toDateString();
-                            if (lastDate !== today) {
-                                changed = true;
-                                return { ...t, isCompleted: false };
-                            }
+                        // Reset if it's a new day
+                        // Logic: If lastCompleted date is not today, reset completedCount and isCompleted
+                        // We check both completion and partial completion (count > 0)
+                        const lastDateStr = t.lastCompleted ? new Date(t.lastCompleted).toDateString() : null;
+                        if (lastDateStr !== today && (t.isCompleted || (t.completedCount > 0))) {
+                            changed = true;
+                            return { ...t, isCompleted: false, completedCount: 0 };
                         }
                         return t;
                     });
                     return changed ? { ...mem, tasks: newTasks } : mem;
                 });
                 if (JSON.stringify(newFam) !== JSON.stringify(config.family)) {
-                     // Auto-save logic if needed, skipped for simplicity to prevent loops
+                     // In a real app we'd save state here, avoiding infinite loop by strict equality check above
+                     setConfig({...config, family: newFam});
+                     localStorage.setItem('dashConfigV37', JSON.stringify({...config, family: newFam}));
                 }
-            }, []);
+            }, []); // Run once on mount
 
             const onTouchEnd = (e) => {
                 if (!touchStart.current) return;
@@ -788,7 +811,7 @@
 
             const saveConfig = (newConf) => {
                 setConfig(newConf);
-                localStorage.setItem('dashConfigV36', JSON.stringify(newConf));
+                localStorage.setItem('dashConfigV37', JSON.stringify(newConf));
                 setShowSettings(false);
             }
 
