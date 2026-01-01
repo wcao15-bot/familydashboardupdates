@@ -41,9 +41,6 @@
         @keyframes bounce-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         .animate-bounce-slow { animation: bounce-slow 2s infinite; }
         
-        /* Apple Music */
-        .music-container iframe { border-radius: 16px; border: none; }
-        
         /* Scrollbar hide */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -168,20 +165,20 @@
             calendar: { embedCode: '<iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=America%2FLos_Angeles&showPrint=0&title=Noakeses%20Calendar&src=d2NhbzE1QGdtYWlsLmNvbQ&src=OTA1YjcxM2RiOTI5MjUxYWJmNjZmZjlkOTQ0ODFjZmNiNzgxY2QzNWFiZTIzNmEzYmNlMDMwOGE3NDMyZGVlN0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=Yjg0YzhkM2VlNDg2YTMxYmQzNTA3MTIwOWNmMDVkNWFiZWE3NzA0YzU5ZmIwMzlkNTcyYzA4MmI0ZGVkODkxOUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=ZWYxZTE1MzVmOGQzNWQyNmNjNjJlMThhY2E1NDg2ZDg0NGEyYzM3N2VjZjZiNzY3MDdkYjUzMmNkMmVjZjFiYkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=MjkzNDYxMDI4NDkzZjllOTJkMTE5ZjYwODgxZDgyMWZjYzA0NDM4NjYwYWI4ZTFkZjQxYzEwZjk5M2E3YWUzM0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t&color=%238e24aa&color=%23f6bf26&color=%23b39ddb&color=%23ef6c00&color=%23d50000" style="border:solid 1px #777" width="800" height="600" frameborder="0" scrolling="no"></iframe>' },
             groceryUrl: '',
             photos: [ './images/family01.jpg', './images/family02.jpg' ],
-            countdown: { title: 'Disneyland!!', date: '2026-2-13' },
+            countdown: { title: 'DISNEYLAND!', date: '2026-02-13' },
             playlists: [ { name: "Hits", url: "https://music.apple.com/us/playlist/todays-hits/pl.f4d106fed2bd41149aaacabb233eb5eb" }, { name: "Chill", url: "https://music.apple.com/us/playlist/pure-focus/pl.5360089767504670966f7075c392237f" }, { name: "Disney", url: "https://music.apple.com/us/playlist/disney-hits/pl.f44b284795f2406b904e76469e9e9e9f" } ],
             family: [
                 { id: 1, name: 'Mom', type: 'parent', color: 'bg-rose-100 text-rose-800', calendarUrl: '<iframe src="https://calendar.google.com/calendar/embed?src=wcao15%40gmail.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>' },
                 { id: 2, name: 'Dad', type: 'parent', color: 'bg-red-100 text-red-800', calendarUrl: '<iframe src="https://calendar.google.com/calendar/embed?src=293461028493f9e92d119f60881d821fcc04438660ab8e1df41c10f993a7ae33%40group.calendar.google.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>' },
                 { 
-                    id: 3, name: 'Lincoln', type: 'kid', score: 0, goalName: 'Minecraft Hour', goalTarget: 300, color: 'bg-orange-100 text-orange-800', 
+                    id: 3, name: 'Lincoln', type: 'kid', score: 240, goalName: 'Minecraft Hour', goalTarget: 300, color: 'bg-orange-100 text-orange-800', 
                     calendarUrl: '<iframe src="https://calendar.google.com/calendar/embed?src=ef1e1535f8d35d26cc62e18aca5486d844a2c377ecf6b76707db532cd2ecf1bb%40group.calendar.google.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>', 
                     inventory: [], placedStickers: [], 
                     tasks: [ { id: 'l1', t: "Make Bed", p: 2, maxRepeats: 1, completedCount: 0 }, { id: 'l2', t: "Cups/Dishes to Sink", p: 3, maxRepeats: 3, completedCount: 0 }, { id: 'l3', t: "Homework", p: 5, maxRepeats: 1, completedCount: 0 }, { id: 'l4', t: "Brush Teeth", p: 3, maxRepeats: 2, completedCount: 0 }, { id: 'l5', t: "Put Clothes Away", p: 3, maxRepeats: 2, completedCount: 0 } ],
                     shopItems: generatePokemonShop()
                 },
                 { 
-                    id: 4, name: 'Kennedy', type: 'kid', score: 0, goalName: 'Paint Nails 💅', goalTarget: 250, color: 'bg-purple-100 text-purple-800', 
+                    id: 4, name: 'Kennedy', type: 'kid', score: 190, goalName: 'Paint Nails 💅', goalTarget: 250, color: 'bg-purple-100 text-purple-800', 
                     calendarUrl: '<iframe src="https://calendar.google.com/calendar/embed?src=b84c8d3ee486a31bd35071209cf05d5abea7704c59fb039d572c082b4ded8919%40group.calendar.google.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>', 
                     inventory: [], placedStickers: [], 
                     tasks: [ { id: 'k1', t: "Make Bed", p: 2, maxRepeats: 1, completedCount: 0 }, { id: 'k2', t: "Cups/Dishes to Sink", p: 3, maxRepeats: 3, completedCount: 0 }, { id: 'k3', t: "Workbook", p: 5, maxRepeats: 1, completedCount: 0 }, { id: 'k4', t: "Brush Teeth", p: 3, maxRepeats: 2, completedCount: 0 }, { id: 'k5', t: "Put Clothes Away", p: 3, maxRepeats: 2, completedCount: 0 } ],
@@ -272,15 +269,15 @@
 
             return (
                 <div className="flex flex-col items-center justify-center py-4">
-                    <div className="relative w-56 h-56 mb-6">
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-10 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[20px] border-t-red-500 drop-shadow-md"></div>
+                    <div className="relative w-80 h-80 mb-6">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-10 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[30px] border-t-red-500 drop-shadow-md"></div>
                         <div className="w-full h-full rounded-full overflow-hidden border-4 border-white shadow-xl relative transition-transform" style={{ transform: `rotate(${rotation}deg)`, transitionDuration: isSpinning ? '4s' : '0s', transitionTimingFunction: 'cubic-bezier(0.25, 0.1, 0.25, 1)', background: `conic-gradient(${activePrizes.map((p, i) => `${p.color} ${i * (100/activePrizes.length)}% ${(i+1) * (100/activePrizes.length)}%`).join(', ')})` }}>
-                            {activePrizes.map((p, i) => (<div key={i} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-700" style={{ transform: `rotate(${i * (360 / activePrizes.length) + (360/activePrizes.length)/2}deg) translate(0, -70px) rotate(0deg)` }}>{p.label}</div>))}
+                            {activePrizes.map((p, i) => (<div key={i} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm font-bold text-slate-700" style={{ transform: `rotate(${i * (360 / activePrizes.length) + (360/activePrizes.length)/2}deg) translate(0, -100px) rotate(0deg)` }}>{p.label}</div>))}
                         </div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full shadow-lg border-2 border-gray-200 z-10"></div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg border-2 border-gray-200 z-10"></div>
                     </div>
-                    {prize && !isSpinning && <div className="mb-4 text-xl font-bold text-indigo-600 animate-bounce">{prize.type === 'sticker' ? 'New Sticker!' : `Won ${prize.value} pts!`}</div>}
-                    <button onClick={handleSpin} disabled={points < cost || isSpinning} className={`px-6 py-2 rounded-full font-bold text-white shadow-lg transition-all ${points >= cost && !isSpinning ? 'bg-indigo-500 hover:bg-indigo-600 active:scale-95' : 'bg-gray-300 cursor-not-allowed'}`}>{isSpinning ? '...' : `Spin (${cost} Pts)`}</button>
+                    {prize && !isSpinning && <div className="mb-4 text-2xl font-bold text-indigo-600 animate-bounce">{prize.type === 'sticker' ? 'New Sticker!' : `Won ${prize.value} pts!`}</div>}
+                    <button onClick={handleSpin} disabled={points < cost || isSpinning} className={`px-8 py-3 rounded-full font-bold text-xl text-white shadow-lg transition-all ${points >= cost && !isSpinning ? 'bg-indigo-500 hover:bg-indigo-600 active:scale-95' : 'bg-gray-300 cursor-not-allowed'}`}>{isSpinning ? '...' : `Spin (${cost} Pts)`}</button>
                 </div>
             );
         };
@@ -434,15 +431,6 @@
                                         <div className="text-xs font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-full">+{task.p}</div>
                                     </div>
                                 ))}
-                                
-                                {/* Correction Controls */}
-                                <div className="mt-8 pt-6 border-t border-slate-200">
-                                    <h4 className="text-xs font-bold text-slate-400 uppercase mb-3">Parent Controls</h4>
-                                    <div className="flex gap-3">
-                                        <button onClick={() => onUpdate({...member, score: Math.max(0, member.score - 10)})} className="px-4 py-2 bg-red-50 text-red-500 rounded-lg text-xs font-bold border border-red-100 hover:bg-red-100 transition">Undo (-10)</button>
-                                        <button onClick={() => onUpdate({...member, score: 0})} className="px-4 py-2 bg-slate-100 text-slate-500 rounded-lg text-xs font-bold border border-slate-200 hover:bg-slate-200 transition">Reset Score</button>
-                                    </div>
-                                </div>
                             </div>
                         )}
 
@@ -585,7 +573,49 @@
         const CalendarView = ({ memberUrl, defaultUrl }) => { const url = memberUrl || defaultUrl; const src = url.match(/src="([^"]+)"/)?.[1] || ""; return ( <div className="card h-full flex flex-col fade-in border-0 shadow-lg"> <div className="card-header bg-white py-4"><h3 className="font-bold text-xl text-slate-800 flex items-center gap-2"><Icons.Calendar /> Schedule</h3></div> <div className="flex-1 calendar-wrapper bg-white">{src ? <iframe src={src} scrolling="no" /> : <div className="h-full flex items-center justify-center text-slate-400">No Calendar Linked</div>}</div> </div> ); };
         const AppleMusicPlayer = ({ playlists }) => { const [activeUrl, setActiveUrl] = useState(playlists[0]?.url || ""); const getEmbedUrl = (url) => url ? url.replace("music.apple.com", "embed.music.apple.com") : ""; return ( <div className="card h-full flex flex-col p-6 bg-white border-2 border-pink-100 shadow-xl"> <h3 className="text-pink-400 font-kids text-3xl mb-4 flex items-center gap-3 font-bold"><Icons.Music /> DJ Station</h3> <div className="flex-1 music-container bg-pink-50 rounded-2xl overflow-hidden shadow-inner mb-6 relative"><iframe src={getEmbedUrl(activeUrl)} width="100%" height="100%" allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" className="absolute inset-0"></iframe></div> <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">{playlists.map((pl, i) => (<button key={i} onClick={() => setActiveUrl(pl.url)} className={`flex-1 min-w-[120px] py-4 px-4 rounded-xl font-kids text-lg font-bold shadow-md ${activeUrl === pl.url ? 'bg-pink-500 text-white ring-4 ring-pink-200' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}>{pl.name}</button>))}</div> </div> ); };
         const JokeWidget = () => { const [joke, setJoke] = useState(null); const [showPunchline, setShowPunchline] = useState(false); const fetchJoke = async () => { setShowPunchline(false); try { const res = await fetch('https://official-joke-api.appspot.com/jokes/random'); const data = await res.json(); setJoke(data); } catch (e) { setJoke({ setup: "Why did the chicken cross?", punchline: "To get to the other side!" }); } }; useEffect(() => { fetchJoke(); }, []); return ( <div onClick={() => showPunchline ? fetchJoke() : setShowPunchline(true)} className="card p-8 h-full flex flex-col items-center justify-center text-center cursor-pointer relative bg-gradient-to-br from-indigo-50 to-purple-50 hover:shadow-xl transition border-2 border-purple-100 select-none"> <div className="absolute top-6 left-6 text-purple-400 text-sm font-bold uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full flex items-center gap-1"><Icons.Smile /> Joke of the Day</div> {joke ? (<div className="mt-8 flex flex-col items-center justify-center h-full w-full"><div className="font-kids text-4xl text-slate-800 mb-8 leading-snug font-bold max-w-md">{joke.setup}</div>{showPunchline ? <div className="font-kids text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600 animate-pop leading-tight drop-shadow-sm">{joke.punchline}<div className="text-sm font-sans font-medium text-slate-400 mt-6 opacity-60">(Tap for another)</div></div> : <button className="bg-purple-500 text-white px-8 py-3 rounded-full text-xl font-bold shadow-lg shadow-purple-200 hover:bg-purple-600 transition transform hover:-translate-y-1">Tap for Answer</button>}</div>) : <div className="animate-pulse text-2xl font-kids text-slate-300">Finding a good one...</div>} </div> ); };
-        const Countdown = ({ targetDate, title }) => { const [timeLeft, setTimeLeft] = useState(""); useEffect(() => { const calc = () => { const diff = new Date(targetDate).getTime() - new Date().getTime(); setTimeLeft(diff < 0 ? "Hooray!" : `${Math.floor(diff / (1000 * 60 * 60 * 24))} Days`); }; calc(); }, [targetDate]); return ( <div className="card px-8 flex flex-row items-center justify-between h-full bg-blue-50 border-2 border-blue-100 shadow-md"> <div className="flex items-center gap-4"><div className="bg-blue-200 p-2 rounded-lg text-blue-700"><Icons.Calendar /></div><div><div className="text-blue-400 uppercase tracking-widest text-xs font-bold">Countdown</div><div className="font-kids text-2xl text-blue-900 font-bold">{title}</div></div></div><div className="font-kids text-5xl font-extrabold text-blue-500">{timeLeft}</div> </div> ); };
+        const Countdown = ({ targetDate, title }) => { 
+            const [timeLeft, setTimeLeft] = useState(0); 
+            const [squares, setSquares] = useState(0);
+
+            useEffect(() => { 
+                const calc = () => { 
+                    const diff = new Date(targetDate).getTime() - new Date().getTime(); 
+                    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                    setTimeLeft(days < 0 ? 0 : days); 
+                    setSquares(days < 0 ? 0 : Math.min(100, days)); // Limit squares visually to 100 max or use actual days
+                }; 
+                calc(); 
+            }, [targetDate]); 
+            
+            return ( 
+                <div className="card h-full flex flex-col p-6 bg-white border-2 border-blue-100 shadow-md"> 
+                    <div className="flex justify-between items-center mb-4">
+                         <div className="flex items-center gap-3">
+                             <div className="bg-blue-100 p-3 rounded-xl text-blue-600"><Icons.Calendar /></div>
+                             <div>
+                                 <div className="text-xs font-bold text-blue-400 uppercase tracking-widest">Countdown To</div>
+                                 <div className="text-3xl font-kids font-bold text-slate-800">{title}</div>
+                             </div>
+                         </div>
+                         <div className="text-right">
+                             <div className="text-6xl font-kids font-extrabold text-blue-500">{timeLeft}</div>
+                             <div className="text-sm font-bold text-slate-400 uppercase">Days Left</div>
+                         </div>
+                    </div>
+                    
+                    <div className="flex-1 bg-slate-50 rounded-xl p-4 border border-slate-100 overflow-y-auto">
+                        <div className="flex flex-wrap gap-2 content-start justify-center">
+                            {Array.from({length: squares}).map((_, i) => (
+                                <div key={i} className="w-8 h-8 bg-blue-400 rounded-md shadow-sm border-2 border-blue-300 flex items-center justify-center text-[10px] font-bold text-white opacity-80">
+                                    {timeLeft - i}
+                                </div>
+                            ))}
+                            {timeLeft > 100 && <div className="w-8 h-8 flex items-center justify-center text-slate-400 font-bold">...</div>}
+                        </div>
+                    </div>
+                </div> 
+            ); 
+        };
 
         // --- SETTINGS ---
         const Settings = ({ isOpen, onClose, config, onSave }) => {
@@ -668,6 +698,25 @@
                                                 <input className="w-full bg-white p-2 rounded text-xs font-mono border border-slate-200 text-slate-500 mb-3" placeholder="Calendar Embed Code" value={mem.calendarUrl || ''} onChange={e => handleFamily(i, 'calendarUrl', e.target.value)} />
                                                 {mem.type === 'kid' && (
                                                     <div className="mt-2 pl-4 border-l-2 border-slate-200">
+                                                        
+                                                        {/* --- NEW: Score Editing --- */}
+                                                        <div className="mb-4 pb-4 border-b border-slate-100">
+                                                            <div className="text-xs font-bold text-slate-400 uppercase mb-2">Current Score</div>
+                                                            <div className="flex gap-2 items-center">
+                                                                <button onClick={() => handleFamily(i, 'score', Math.max(0, (mem.score || 0) - 10))} className="px-3 py-1 bg-red-50 text-red-500 rounded text-xs font-bold border border-red-100 hover:bg-red-100">-10</button>
+                                                                <button onClick={() => handleFamily(i, 'score', Math.max(0, (mem.score || 0) - 1))} className="px-3 py-1 bg-red-50 text-red-500 rounded text-xs font-bold border border-red-100 hover:bg-red-100">-1</button>
+                                                                <input 
+                                                                    type="number" 
+                                                                    value={mem.score || 0} 
+                                                                    onChange={(e) => handleFamily(i, 'score', parseInt(e.target.value) || 0)}
+                                                                    className="w-16 bg-white border border-slate-200 rounded p-1 text-center font-bold text-slate-700"
+                                                                />
+                                                                <button onClick={() => handleFamily(i, 'score', (mem.score || 0) + 1)} className="px-3 py-1 bg-green-50 text-green-500 rounded text-xs font-bold border border-green-100 hover:bg-green-100">+1</button>
+                                                                <button onClick={() => handleFamily(i, 'score', (mem.score || 0) + 10)} className="px-3 py-1 bg-green-50 text-green-500 rounded text-xs font-bold border border-green-100 hover:bg-green-100">+10</button>
+                                                                <button onClick={() => handleFamily(i, 'score', 0)} className="ml-auto px-3 py-1 bg-slate-100 text-slate-500 rounded text-xs font-bold hover:bg-slate-200">Reset</button>
+                                                            </div>
+                                                        </div>
+
                                                         <div className="text-xs font-bold text-slate-400 uppercase mb-2">Tasks & Points</div>
                                                         {mem.tasks && mem.tasks.map((task, tIdx) => (
                                                              <div key={tIdx} className="flex gap-2 mb-2 items-center">
@@ -765,8 +814,8 @@
             const touchStart = useRef(null);
             
             const [config, setConfig] = useState(() => {
-                // Versioning to force new schema update (V37 for Max Repeats)
-                try { const s = localStorage.getItem('dashConfigV37'); return s ? JSON.parse(s) : DEFAULT_CONFIG; } catch(e) { return DEFAULT_CONFIG; }
+                // Versioning to force new schema update (V39 for Kids Zone Layout & Defaults)
+                try { const s = localStorage.getItem('dashConfigV39'); return s ? JSON.parse(s) : DEFAULT_CONFIG; } catch(e) { return DEFAULT_CONFIG; }
             });
 
             useEffect(() => {
@@ -777,8 +826,6 @@
                     let changed = false;
                     const newTasks = mem.tasks.map(t => {
                         // Reset if it's a new day
-                        // Logic: If lastCompleted date is not today, reset completedCount and isCompleted
-                        // We check both completion and partial completion (count > 0)
                         const lastDateStr = t.lastCompleted ? new Date(t.lastCompleted).toDateString() : null;
                         if (lastDateStr !== today && (t.isCompleted || (t.completedCount > 0))) {
                             changed = true;
@@ -791,7 +838,7 @@
                 if (JSON.stringify(newFam) !== JSON.stringify(config.family)) {
                      // In a real app we'd save state here, avoiding infinite loop by strict equality check above
                      setConfig({...config, family: newFam});
-                     localStorage.setItem('dashConfigV37', JSON.stringify({...config, family: newFam}));
+                     localStorage.setItem('dashConfigV39', JSON.stringify({...config, family: newFam}));
                 }
             }, []); // Run once on mount
 
@@ -811,7 +858,7 @@
 
             const saveConfig = (newConf) => {
                 setConfig(newConf);
-                localStorage.setItem('dashConfigV37', JSON.stringify(newConf));
+                localStorage.setItem('dashConfigV39', JSON.stringify(newConf));
                 setShowSettings(false);
             }
 
@@ -834,7 +881,7 @@
                     <div className="absolute top-0 left-0 w-full p-8 flex justify-between items-start pointer-events-none z-40 bg-gradient-to-b from-white/80 to-transparent pb-16"><Clock /><Weather lat={config.weather.lat} lon={config.weather.lon} /></div>
                     
                     {/* Controls */}
-                    <div className="absolute bottom-6 right-6 flex gap-4 z-50">
+                    <div className="absolute bottom-6 left-6 flex gap-4 z-50">
                         <button onClick={toggleFullScreen} className="p-3 bg-white rounded-full text-slate-400 hover:text-slate-800 transition shadow-lg"><Icons.Maximize /></button>
                         <button onClick={() => setShowSettings(true)} className="p-3 bg-white rounded-full text-slate-400 hover:text-slate-800 transition shadow-lg"><Icons.Settings /></button>
                     </div>
@@ -867,11 +914,15 @@
                         <div className="w-screen h-full p-8 pt-48 grid grid-cols-12 gap-6"><div className="col-span-12 h-full"><KennedyCalendar schedule={config.kennedySchedule} /></div></div>
 
                         {/* PAGE 4: KIDS ZONE */}
-                        <div className="w-screen h-full p-8 pt-48 grid grid-cols-12 grid-rows-12 gap-6"><div className="col-span-12 row-span-1"><h2 className="font-kids text-4xl text-slate-800 font-extrabold flex items-center gap-3"><span className="text-yellow-400">✨</span> Kids Zone</h2></div><div className="col-span-7 row-span-11 flex flex-col gap-6"><div className="flex-1"><AppleMusicPlayer playlists={config.playlists} /></div></div>
-                        <div className="col-span-5 row-span-11 flex flex-col gap-6">
+                        <div className="w-screen h-full p-8 pt-48 grid grid-cols-12 grid-rows-12 gap-6"><div className="col-span-12 row-span-1"><h2 className="font-kids text-4xl text-slate-800 font-extrabold flex items-center gap-3"><span className="text-yellow-400">✨</span> Kids Zone</h2></div>
+                        {/* Countdown takes the big left slot */}
+                        <div className="col-span-8 row-span-11">
+                             <Countdown targetDate={config.countdown.date} title={config.countdown.title} />
+                        </div>
+                        {/* Side widgets */}
+                        <div className="col-span-4 row-span-11 flex flex-col gap-6">
                             <div className="flex-1"><JokeWidget /></div>
                             <div className="flex-1"><FactWidget /></div>
-                            <div className="h-32"><Countdown targetDate={config.countdown.date} title={config.countdown.title} /></div>
                         </div>
                         </div>
 
