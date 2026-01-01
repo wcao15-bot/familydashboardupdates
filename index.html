@@ -15,6 +15,9 @@
     <!-- Babel (for parsing JSX in browser) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&family=Caveat:wght@700&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
 
@@ -35,7 +38,9 @@
         .animate-float { animation: float 3s ease-in-out infinite; }
         @keyframes pulse-red { 0%, 100% { background-color: #ef4444; } 50% { background-color: #b91c1c; } }
         .animate-alarm { animation: pulse-red 1s infinite; }
-      
+        @keyframes bounce-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .animate-bounce-slow { animation: bounce-slow 2s infinite; }
+        
         /* Apple Music */
         .music-container iframe { border-radius: 16px; border: none; }
         
@@ -46,6 +51,10 @@
         /* Sticker specific styles */
         .sticker { touch-action: none; user-select: none; -webkit-user-select: none; }
         .sticker:active { cursor: grabbing; scale: 1.1; }
+        
+        /* Tab Styles */
+        .tab-btn { @apply px-4 py-2 font-bold text-sm text-slate-500 rounded-lg transition-colors; }
+        .tab-btn.active { @apply bg-slate-800 text-white; }
     </style>
 </head>
 <body>
@@ -54,24 +63,36 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- THEMES ---
-        const THEMES = {
-            'Default': 'bg-[#fdfbf7]',
-            'Ocean': 'bg-gradient-to-br from-blue-100 to-cyan-200',
-            'Sunset': 'bg-gradient-to-br from-orange-100 to-rose-200',
-            'Forest': 'bg-gradient-to-br from-emerald-100 to-teal-200',
-            'Lavender': 'bg-gradient-to-br from-purple-100 to-indigo-200',
-            'Midnight': 'bg-slate-900',
-            // Seasonal & Holiday
-            'Christmas': 'bg-gradient-to-br from-red-50 to-green-50',
-            'Halloween': 'bg-gradient-to-br from-orange-100 to-purple-200',
-            'Spring': 'bg-gradient-to-br from-pink-100 to-green-100',
-            'Summer': 'bg-gradient-to-br from-yellow-100 to-sky-200',
-            'Autumn': 'bg-gradient-to-br from-orange-100 to-amber-100',
-            'Winter': 'bg-gradient-to-br from-blue-50 to-slate-200'
+        // --- SOUND & CONFETTI UTILS ---
+        const playCelebrationSound = () => {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const now = ctx.currentTime;
+                [0, 0.1, 0.2].forEach((delay, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    const freqs = [523.25, 659.25, 783.99]; // C Major
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freqs[i], now + delay);
+                    gain.gain.setValueAtTime(0.1, now + delay);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.5);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now + delay);
+                    osc.stop(now + delay + 0.5);
+                });
+            } catch (e) { console.error("Audio error", e); }
         };
 
-        // --- ICONS (Inline SVGs) ---
+        const triggerConfetti = () => {
+            if (window.confetti) {
+                window.confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }
+        };
+
+        // --- ICONS (Expanded for KidDo) ---
         const Icons = {
             Car: () => <svg className="w-6 h-6 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M2 12h12"/></svg>,
             Timer: () => <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>,
@@ -80,651 +101,579 @@
             Smile: () => <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></svg>,
             Heart: () => <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>,
             Maximize: () => <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>,
-            Settings: () => <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+            Settings: () => <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
             Rainbow: () => <svg className="w-full h-full" viewBox="0 0 100 50" fill="none"><path d="M10 50 A 40 40 0 0 1 90 50" stroke="#ef4444" strokeWidth="6" strokeLinecap="round" /><path d="M20 50 A 30 30 0 0 1 80 50" stroke="#eab308" strokeWidth="6" strokeLinecap="round" /><path d="M30 50 A 20 20 0 0 1 70 50" stroke="#3b82f6" strokeWidth="6" strokeLinecap="round" /></svg>,
             Cart: () => <svg className="w-20 h-20 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>,
             Link: () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
             Star: () => <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>,
             Lightbulb: ({size}) => <svg className={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>,
-            Sun: ({size}) => <svg className={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            Sun: ({size}) => <svg className={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>,
+            // KidDo Icons
+            CheckCircle2: ({size=24, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>,
+            Circle: ({size=24, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/></svg>,
+            Plus: ({size=24, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>,
+            Trash2: ({size=24, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>,
+            Trophy: ({size=24, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>,
+            Palette: ({size=24, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>,
+            Gamepad2: ({size=24, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="2"/></svg>,
+            Repeat: ({size=24, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>,
+            X: ({size=24, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 18 18"/></svg>,
+            Sparkles: ({size=24, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M9 3v4"/><path d="M2 7h4"/><path d="M2 3h4"/></svg>,
+            Gift: ({size=24, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.9 4.9 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
         };
 
         const FunIcons = {
-            Home: ({className}) => (
-                <svg className={className} viewBox="0 0 24 24" fill="none">
-                    <path d="M3 10L12 3L21 10V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V10Z" fill="#3B82F6"/>
-                    <path d="M2 10L12 2L22 10" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M9 22V12H15V22" fill="#93C5FD" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-            ),
-            School: ({className}) => (
-                <svg className={className} viewBox="0 0 24 24" fill="none">
-                    <path d="M4 16H20" stroke="#F59E0B" strokeWidth="14" strokeLinecap="round"/>
-                    <path d="M4 16H20" stroke="#FCD34D" strokeWidth="10" strokeLinecap="round"/>
-                    <circle cx="6" cy="20" r="2.5" fill="#1F2937" stroke="#374151" strokeWidth="1"/>
-                    <circle cx="18" cy="20" r="2.5" fill="#1F2937" stroke="#374151" strokeWidth="1"/>
-                    <path d="M2 16L2 12C2 9 4 9 4 9H18" stroke="#F59E0B" strokeWidth="2"/>
-                    <rect x="5" y="11" width="3" height="3" fill="#93C5FD" rx="0.5"/>
-                    <rect x="9" y="11" width="3" height="3" fill="#93C5FD" rx="0.5"/>
-                    <rect x="13" y="11" width="3" height="3" fill="#93C5FD" rx="0.5"/>
-                </svg>
-            ),
-            YMCA: ({className}) => (
-                <svg className={className} viewBox="0 0 24 24" fill="none">
-                    <text x="50%" y="50%" textAnchor="middle" dy=".35em" fontSize="20" fontWeight="900" fill="#DC2626" stroke="#991B1B" strokeWidth="1">Y</text>
-                </svg>
-            ),
-            Park: ({className}) => (
-                <svg className={className} viewBox="0 0 24 24" fill="none">
-                    <path d="M12 22V12" stroke="#92400E" strokeWidth="4" strokeLinecap="round"/>
-                    <path d="M12 18L7 12L12 6L17 12L12 18Z" fill="#4ADE80" stroke="#166534" strokeWidth="2" strokeLinejoin="round"/>
-                    <circle cx="12" cy="7" r="5" fill="#22C55E" stroke="#166534" strokeWidth="2"/>
-                    <path d="M18 6L21 3" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round"/>
-                    <circle cx="20" cy="4" r="1.5" fill="#F59E0B"/>
-                </svg>
-            ),
-            Playdate: ({className}) => (
-                <svg className={className} viewBox="0 0 24 24" fill="none">
-                    <circle cx="8" cy="12" r="6" fill="#F472B6"/>
-                    <circle cx="16" cy="12" r="6" fill="#C084FC"/>
-                    <path d="M6 11H10" stroke="#831843" strokeWidth="1.5" strokeLinecap="round"/>
-                    <path d="M14 11H18" stroke="#581C87" strokeWidth="1.5" strokeLinecap="round"/>
-                    <path d="M8 14C8 14 9 15 10 14" stroke="#831843" strokeWidth="1.5" strokeLinecap="round"/>
-                    <path d="M16 14C16 14 17 15 18 14" stroke="#581C87" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-            ),
-            Iceskating: ({className}) => (
-                <svg className={className} viewBox="0 0 24 24" fill="none">
-                    <path d="M12 3v18M3 12h18" stroke="#BFDBFE" strokeWidth="2" strokeLinecap="round"/>
-                    <path d="M7 7l10 10M7 17L17 7" stroke="#BFDBFE" strokeWidth="2" strokeLinecap="round"/>
-                    <path d="M6 18L9 21H15" stroke="#1E40AF" strokeWidth="2" strokeLinecap="round"/>
-                    <circle cx="12" cy="12" r="2" fill="white" />
-                </svg>
-            )
+            Home: ({className}) => (<svg className={className} viewBox="0 0 24 24" fill="none"><path d="M3 10L12 3L21 10V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V10Z" fill="#3B82F6"/><path d="M2 10L12 2L22 10" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M9 22V12H15V22" fill="#93C5FD" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>),
+            School: ({className}) => (<svg className={className} viewBox="0 0 24 24" fill="none"><path d="M4 16H20" stroke="#F59E0B" strokeWidth="14" strokeLinecap="round"/><path d="M4 16H20" stroke="#FCD34D" strokeWidth="10" strokeLinecap="round"/><circle cx="6" cy="20" r="2.5" fill="#1F2937" stroke="#374151" strokeWidth="1"/><circle cx="18" cy="20" r="2.5" fill="#1F2937" stroke="#374151" strokeWidth="1"/><path d="M2 16L2 12C2 9 4 9 4 9H18" stroke="#F59E0B" strokeWidth="2"/><rect x="5" y="11" width="3" height="3" fill="#93C5FD" rx="0.5"/><rect x="9" y="11" width="3" height="3" fill="#93C5FD" rx="0.5"/><rect x="13" y="11" width="3" height="3" fill="#93C5FD" rx="0.5"/></svg>),
+            YMCA: ({className}) => (<svg className={className} viewBox="0 0 24 24" fill="none"><text x="50%" y="50%" textAnchor="middle" dy=".35em" fontSize="20" fontWeight="900" fill="#DC2626" stroke="#991B1B" strokeWidth="1">Y</text></svg>),
+            Park: ({className}) => (<svg className={className} viewBox="0 0 24 24" fill="none"><path d="M12 22V12" stroke="#92400E" strokeWidth="4" strokeLinecap="round"/><path d="M12 18L7 12L12 6L17 12L12 18Z" fill="#4ADE80" stroke="#166534" strokeWidth="2" strokeLinejoin="round"/><circle cx="12" cy="7" r="5" fill="#22C55E" stroke="#166534" strokeWidth="2"/><path d="M18 6L21 3" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round"/><circle cx="20" cy="4" r="1.5" fill="#F59E0B"/></svg>),
+            Playdate: ({className}) => (<svg className={className} viewBox="0 0 24 24" fill="none"><circle cx="8" cy="12" r="6" fill="#F472B6"/><circle cx="16" cy="12" r="6" fill="#C084FC"/><path d="M6 11H10" stroke="#831843" strokeWidth="1.5" strokeLinecap="round"/><path d="M14 11H18" stroke="#581C87" strokeWidth="1.5" strokeLinecap="round"/><path d="M8 14C8 14 9 15 10 14" stroke="#831843" strokeWidth="1.5" strokeLinecap="round"/><path d="M16 14C16 14 17 15 18 14" stroke="#581C87" strokeWidth="1.5" strokeLinecap="round"/></svg>),
+            Iceskating: ({className}) => (<svg className={className} viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18" stroke="#BFDBFE" strokeWidth="2" strokeLinecap="round"/><path d="M7 7l10 10M7 17L17 7" stroke="#BFDBFE" strokeWidth="2" strokeLinecap="round"/><path d="M6 18L9 21H15" stroke="#1E40AF" strokeWidth="2" strokeLinecap="round"/><circle cx="12" cy="12" r="2" fill="white" /></svg>)
+        };
+
+        const THEMES = { 'Default': 'bg-[#fdfbf7]' }; 
+
+        // --- POKEMON DATA ---
+        const POKEMON_NAMES = [
+            "Bulbasaur","Ivysaur","Venusaur","Charmander","Charmeleon","Charizard","Squirtle","Wartortle","Blastoise","Caterpie","Metapod","Butterfree","Weedle","Kakuna","Beedrill","Pidgey","Pidgeotto","Pidgeot","Rattata","Raticate","Spearow","Fearow","Ekans","Arbok","Pikachu","Raichu","Sandshrew","Sandslash","Nidoran♀","Nidorina","Nidoqueen","Nidoran♂","Nidorino","Nidoking","Clefairy","Clefable","Vulpix","Ninetales","Jigglypuff","Wigglytuff","Zubat","Golbat","Oddish","Gloom","Vileplume","Paras","Parasect","Venonat","Venomoth","Diglett","Dugtrio","Meowth","Persian","Psyduck","Golduck","Mankey","Primeape","Growlithe","Arcanine","Poliwag","Poliwhirl","Poliwrath","Abra","Kadabra","Alakazam","Machop","Machoke","Machamp","Bellsprout","Weepinbell","Victreebel","Tentacool","Tentacruel","Geodude","Graveler","Golem","Ponyta","Rapidash","Slowpoke","Slowbro","Magnemite","Magneton","Farfetch'd","Doduo","Dodrio","Seel","Dewgong","Grimer","Muk","Shellder","Cloyster","Gastly","Haunter","Gengar","Onix","Drowzee","Hypno","Krabby","Kingler","Voltorb","Electrode","Exeggcute","Exeggutor","Cubone","Marowak","Hitmonlee","Hitmonchan","Lickitung","Koffing","Weezing","Rhyhorn","Rhydon","Chansey","Tangela","Kangaskhan","Horsea","Seadra","Goldeen","Seaking","Staryu","Starmie","Mr. Mime","Scyther","Jynx","Electabuzz","Magmar","Pinsir","Tauros","Magikarp","Gyarados","Lapras","Ditto","Eevee","Vaporeon","Jolteon","Flareon","Porygon","Omanyte","Omastar","Kabuto","Kabutops","Aerodactyl","Snorlax","Articuno","Zapdos","Moltres","Dratini","Dragonair","Dragonite","Mewtwo","Mew"
+        ];
+
+        const generatePokemonShop = () => {
+            return POKEMON_NAMES.map((name, i) => {
+                const id = i + 1;
+                let price = 15; // Base price
+                if (id >= 144) price = 60; // Legendaries are expensive
+                else if ((i % 3) === 2) price = 40; // Stage 3 roughly
+                else if ((i % 3) === 1) price = 25; // Stage 2 roughly
+                
+                // Exceptions for popular single stage / unusual logic, but broad strokes work well
+                if (name === 'Pikachu') price = 30;
+                if (name === 'Eevee') price = 30;
+
+                return {
+                    id: `p${id}`,
+                    type: 'image',
+                    content: `https://raw.githubusercontent.com/jnovack/pokemon-svg/master/svg/${id}.svg`,
+                    price: price,
+                    name: name
+                };
+            });
         };
 
         const DEFAULT_CONFIG = {
             theme: 'Default',
             customBackground: '',
             weather: { lat: '37.33', lon: '-121.88' },
-            traffic: { 
-                apiKey: 'AIzaSyBs5EBimvIHRmnsa_wKQjtwjK0qA_7Gd0g',
-                routes: [
-                    { label: 'Skyport', origin: '3208 cortona drive, san jose, ca', destination: '1721 technology drive, san jose, ca' },
-                    { label: 'El Camino', origin: '3208 cortona drive, san jose, ca', destination: '555 Knowles Dr, Los Gatos, CA' }
-                ]
-            },
-            calendar: { 
-                embedCode: '<iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=America%2FLos_Angeles&showPrint=0&title=Noakeses%20Calendar&src=d2NhbzE1QGdtYWlsLmNvbQ&src=OTA1YjcxM2RiOTI5MjUxYWJmNjZmZjlkOTQ0ODFjZmNiNzgxY2QzNWFiZTIzNmEzYmNlMDMwOGE3NDMyZGVlN0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=Yjg0YzhkM2VlNDg2YTMxYmQzNTA3MTIwOWNmMDVkNWFiZWE3NzA0YzU5ZmIwMzlkNTcyYzA4MmI0ZGVkODkxOUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=ZWYxZTE1MzVmOGQzNWQyNmNjNjJlMThhY2E1NDg2ZDg0NGEyYzM3N2VjZjZiNzY3MDdkYjUzMmNkMmVjZjFiYkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=MjkzNDYxMDI4NDkzZjllOTJkMTE5ZjYwODgxZDgyMWZjYzA0NDM4NjYwYWI4ZTFkZjQxYzEwZjk5M2E3YWUzM0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t&color=%238e24aa&color=%23f6bf26&color=%23b39ddb&color=%23ef6c00&color=%23d50000" style="border:solid 1px #777" width="800" height="600" frameborder="0" scrolling="no"></iframe>' 
-            },
+            traffic: { apiKey: 'AIzaSyBs5EBimvIHRmnsa_wKQjtwjK0qA_7Gd0g', routes: [ { label: 'Skyport', origin: '3208 cortona drive, san jose, ca', destination: '1721 technology drive, san jose, ca' }, { label: 'El Camino', origin: '3208 cortona drive, san jose, ca', destination: '555 Knowles Dr, Los Gatos, CA' } ] },
+            calendar: { embedCode: '<iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=America%2FLos_Angeles&showPrint=0&title=Noakeses%20Calendar&src=d2NhbzE1QGdtYWlsLmNvbQ&src=OTA1YjcxM2RiOTI5MjUxYWJmNjZmZjlkOTQ0ODFjZmNiNzgxY2QzNWFiZTIzNmEzYmNlMDMwOGE3NDMyZGVlN0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=Yjg0YzhkM2VlNDg2YTMxYmQzNTA3MTIwOWNmMDVkNWFiZWE3NzA0YzU5ZmIwMzlkNTcyYzA4MmI0ZGVkODkxOUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=ZWYxZTE1MzVmOGQzNWQyNmNjNjJlMThhY2E1NDg2ZDg0NGEyYzM3N2VjZjZiNzY3MDdkYjUzMmNkMmVjZjFiYkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=MjkzNDYxMDI4NDkzZjllOTJkMTE5ZjYwODgxZDgyMWZjYzA0NDM4NjYwYWI4ZTFkZjQxYzEwZjk5M2E3YWUzM0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t&color=%238e24aa&color=%23f6bf26&color=%23b39ddb&color=%23ef6c00&color=%23d50000" style="border:solid 1px #777" width="800" height="600" frameborder="0" scrolling="no"></iframe>' },
             groceryUrl: '',
-            photos: [ 
-                './images/family01.jpg',
-                './images/family02.jpg'
-            ],
-            countdown: { title: 'Christmas', date: '2025-12-25' },
-            playlists: [
-                { name: "Hits", url: "https://music.apple.com/us/playlist/todays-hits/pl.f4d106fed2bd41149aaacabb233eb5eb" },
-                { name: "Chill", url: "https://music.apple.com/us/playlist/pure-focus/pl.5360089767504670966f7075c392237f" },
-                { name: "Disney", url: "https://music.apple.com/us/playlist/disney-hits/pl.f44b284795f2406b904e76469e9e9e9f" }
-            ],
+            photos: [ './images/family01.jpg', './images/family02.jpg' ],
+            countdown: { title: 'Disneyland!!', date: '2026-2-13' },
+            playlists: [ { name: "Hits", url: "https://music.apple.com/us/playlist/todays-hits/pl.f4d106fed2bd41149aaacabb233eb5eb" }, { name: "Chill", url: "https://music.apple.com/us/playlist/pure-focus/pl.5360089767504670966f7075c392237f" }, { name: "Disney", url: "https://music.apple.com/us/playlist/disney-hits/pl.f44b284795f2406b904e76469e9e9e9f" } ],
             family: [
-                { 
-                    id: 1, name: 'Mom', type: 'parent', color: 'bg-rose-100 text-rose-800', 
-                    calendarUrl: '<iframe src="https://calendar.google.com/calendar/embed?src=wcao15%40gmail.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>' 
-                },
-                // CHANGED: Dad's color to Red
-                { 
-                    id: 2, name: 'Dad', type: 'parent', color: 'bg-red-100 text-red-800', 
-                    calendarUrl: '<iframe src="https://calendar.google.com/calendar/embed?src=293461028493f9e92d119f60881d821fcc04438660ab8e1df41c10f993a7ae33%40group.calendar.google.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>' 
-                },
-                // CHANGED: Lincoln's color to Orange
+                { id: 1, name: 'Mom', type: 'parent', color: 'bg-rose-100 text-rose-800', calendarUrl: '<iframe src="https://calendar.google.com/calendar/embed?src=wcao15%40gmail.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>' },
+                { id: 2, name: 'Dad', type: 'parent', color: 'bg-red-100 text-red-800', calendarUrl: '<iframe src="https://calendar.google.com/calendar/embed?src=293461028493f9e92d119f60881d821fcc04438660ab8e1df41c10f993a7ae33%40group.calendar.google.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>' },
                 { 
                     id: 3, name: 'Lincoln', type: 'kid', score: 240, goalName: 'Minecraft Hour', goalTarget: 300, color: 'bg-orange-100 text-orange-800', 
-                    calendarUrl: '',
-                    tasks: [ { id: 'l1', t: "Make Bed", p: 2 }, { id: 'l2', t: "Cups/Dishes to Sink", p: 5 }, { id: 'l3', t: "Homework", p: 5 }, { id: 'l4', t: "Brush Teeth", p: 5 } ]
+                    calendarUrl: '<iframe src="https://calendar.google.com/calendar/embed?src=ef1e1535f8d35d26cc62e18aca5486d844a2c377ecf6b76707db532cd2ecf1bb%40group.calendar.google.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>', 
+                    inventory: [], placedStickers: [], 
+                    tasks: [ { id: 'l1', t: "Make Bed", p: 2 }, { id: 'l2', t: "Cups/Dishes to Sink", p: 5 }, { id: 'l3', t: "Homework", p: 5 }, { id: 'l4', t: "Brush Teeth", p: 5 }, { id: 'l5', t: "Put Clothes Away", p: 5 } ],
+                    shopItems: generatePokemonShop()
                 },
                 { 
                     id: 4, name: 'Kennedy', type: 'kid', score: 190, goalName: 'Paint Nails 💅', goalTarget: 250, color: 'bg-purple-100 text-purple-800', 
-                    calendarUrl: '',
-                    tasks: [ { id: 'k1', t: "Make Bed", p: 2 }, { id: 'k2', t: "Cups/Dishes to Sink", p: 5 }, { id: 'k3', t: "Workbook", p: 5 }, { id: 'k4', t: "Brush Teeth", p: 5 } ]
+                    calendarUrl: '<iframe src="https://calendar.google.com/calendar/embed?src=b84c8d3ee486a31bd35071209cf05d5abea7704c59fb039d572c082b4ded8919%40group.calendar.google.com&ctz=America%2FLos_Angeles" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>', 
+                    inventory: [], placedStickers: [], 
+                    tasks: [ { id: 'k1', t: "Make Bed", p: 2 }, { id: 'k2', t: "Cups/Dishes to Sink", p: 5 }, { id: 'k3', t: "Workbook", p: 5 }, { id: 'k4', t: "Brush Teeth", p: 5 }, { id: 'k5', t: "Put Clothes Away", p: 5 } ],
+                    shopItems: [
+                        { id: 'k1', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F380.svg', price: 10, name: 'Bow' },
+                        { id: 'k2', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F338.svg', price: 15, name: 'Flower' },
+                        { id: 'k3', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F36D.svg', price: 15, name: 'Lollipop' },
+                        { id: 'k4', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F485.svg', price: 20, name: 'Nails' },
+                        { id: 'k5', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F98B.svg', price: 25, name: 'Butterfly' },
+                        { id: 'k6', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F984.svg', price: 30, name: 'Unicorn' },
+                        { id: 'k7', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F451.svg', price: 35, name: 'Crown' },
+                        { id: 'k8', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F308.svg', price: 40, name: 'Rainbow' },
+                        { id: 'k9', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F3F0.svg', price: 50, name: 'Castle' },
+                        { id: 'k10', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F496.svg', price: 10, name: 'Heart' },
+                        { id: 'k11', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F49C.svg', price: 10, name: 'Purple Heart' },
+                        { id: 'k12', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/2B50.svg', price: 10, name: 'Star' },
+                        { id: 'k13', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F431.svg', price: 20, name: 'Kitty' },
+                        { id: 'k14', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F430.svg', price: 20, name: 'Bunny' },
+                        { id: 'k15', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F43C.svg', price: 25, name: 'Panda' },
+                        { id: 'k16', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F9A9.svg', price: 30, name: 'Flamingo' },
+                        { id: 'k17', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F42C.svg', price: 30, name: 'Dolphin' },
+                        { id: 'k18', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F9C1.svg', price: 15, name: 'Cupcake' },
+                        { id: 'k19', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F369.svg', price: 15, name: 'Donut' },
+                        { id: 'k20', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F366.svg', price: 15, name: 'Ice Cream' },
+                        { id: 'k21', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F353.svg', price: 10, name: 'Strawberry' },
+                        { id: 'k22', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F352.svg', price: 10, name: 'Cherry' },
+                        { id: 'k23', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/2600.svg', price: 15, name: 'Sun' },
+                        { id: 'k24', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F319.svg', price: 15, name: 'Moon' },
+                        { id: 'k25', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F48D.svg', price: 40, name: 'Ring' },
+                        { id: 'k26', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F48E.svg', price: 35, name: 'Gem' },
+                        { id: 'k27', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F484.svg', price: 20, name: 'Lipstick' },
+                        { id: 'k28', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F45B.svg', price: 30, name: 'Purse' },
+                        { id: 'k29', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F460.svg', price: 30, name: 'High Heel' },
+                        { id: 'k30', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1FA70.svg', price: 35, name: 'Ballet' },
+                        { id: 'k31', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F3A8.svg', price: 25, name: 'Art' },
+                        { id: 'k32', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F9DA.svg', price: 40, name: 'Fairy' },
+                        { id: 'k33', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1FA84.svg', price: 30, name: 'Wand' },
+                        { id: 'k34', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F9F8.svg', price: 25, name: 'Teddy' },
+                        { id: 'k35', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F388.svg', price: 10, name: 'Balloon' },
+                        { id: 'k36', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F3B5.svg', price: 10, name: 'Music' },
+                        { id: 'k37', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F339.svg', price: 15, name: 'Rose' },
+                        { id: 'k38', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F33A.svg', price: 15, name: 'Hibiscus' },
+                        { id: 'k39', type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F33B.svg', price: 15, name: 'Sunflower' }
+                    ]
                 }
             ],
-            kennedySchedule: [
-                { day: 'Sunday', icon: ['./images/home.png'] }, 
-                { day: 'Monday', icon: ['./images/home.png', './images/ice skate.png'] }, 
-                { day: 'Tuesday', icon: ['./images/school-bus.png'] }, 
-                { day: 'Wednesday', icon: ['./images/school-bus.png'] }, 
-                { day: 'Thursday', icon: ['./images/school-bus.png'] }, 
-                { day: 'Friday', icon: ['./images/school-bus.png'] }, 
-                { day: 'Saturday', icon: ['./images/y.png'] }
+            kennedySchedule: [ { day: 'Sunday', icon: ['./images/home.png'] }, { day: 'Monday', icon: ['./images/home.png', './images/ice skate.png'] }, { day: 'Tuesday', icon: ['./images/school-bus.png'] }, { day: 'Wednesday', icon: ['./images/school-bus.png'] }, { day: 'Thursday', icon: ['./images/school-bus.png'] }, { day: 'Friday', icon: ['./images/school-bus.png'] }, { day: 'Saturday', icon: ['./images/y.png'] } ],
+            // Default Prizes for 6 segments
+            spinWheelPrizes: [
+                { label: '10 Pts', value: 10, type: 'points', color: '#fca5a5' },
+                { label: 'Sticker', value: 0, type: 'sticker', color: '#93c5fd' },
+                { label: '5 Pts', value: 5, type: 'points', color: '#86efac' },
+                { label: 'Jackpot!', value: 50, type: 'points', color: '#fcd34d' },
+                { label: 'Try Again', value: 0, type: 'points', color: '#d1d5db' },
+                { label: '20 Pts', value: 20, type: 'points', color: '#c4b5fd' }
             ]
         };
 
-        // --- STICKER SYSTEM COMPONENTS ---
-        
-        const AVAILABLE_STICKERS = [
-            // Emojis
-            { type: 'emoji', content: '⭐' }, { type: 'emoji', content: '❤️' }, { type: 'emoji', content: '🎉' },
-            { type: 'emoji', content: '🔥' }, { type: 'emoji', content: '✅' }, { type: 'emoji', content: '🎂' },
-            { type: 'emoji', content: '⚽' }, { type: 'emoji', content: '🍕' }, { type: 'emoji', content: '🎨' },
-            // SVGs from Icons
-            { type: 'icon', content: 'Sun' }, { type: 'icon', content: 'Smile' }, { type: 'icon', content: 'Heart' },
-            { type: 'icon', content: 'Rainbow' }, { type: 'icon', content: 'Car' },
+        // --- NEW KIDDO COMPONENTS ---
+
+        const SpinWheel = ({ onSpin, cost, points, prizes }) => {
+            const [isSpinning, setIsSpinning] = useState(false);
+            const [rotation, setRotation] = useState(0);
+            const [prize, setPrize] = useState(null);
             
-            // --- CUSTOM FLATICON IMAGES ---
-            // 1. Upload your png to the 'images' folder in GitHub
-            // 2. Add them here like this:
-            // { type: 'image', content: './images/taco.png' },
-            // { type: 'image', content: './images/gym.png' },
+            // Use props or default if not provided (fallback)
+            const activePrizes = prizes || [ { label: '10 Pts', value: 10, color: '#fca5a5' }, { label: 'Sticker', value: 'sticker', color: '#93c5fd' }, { label: '5 Pts', value: 5, color: '#86efac' }, { label: 'Jackpot!', value: 50, color: '#fcd34d' }, { label: 'Try Again', value: 0, color: '#d1d5db' }, { label: '20 Pts', value: 20, color: '#c4b5fd' } ];
 
-             // --- OPENMOJI STICKERS (Fun & Open Source) ---
-             // HOW TO ADD MORE:
-             // 1. Go to OpenMoji.org, find an icon, and copy the "Hex" code (e.g. 1F680).
-             // 2. Use this URL format: https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/HEX_CODE_HERE.svg
-            { type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F680.svg' }, // Rocket
-            { type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F984.svg' }, // Unicorn
-            { type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F355.svg' }, // Pizza
-            { type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F996.svg' }, // T-Rex
-            { type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1FAA0.svg' }, // Plunger
-             { type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1FAC1.svg' }, // Lungs
-              { type: 'image', content: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/1F3C0.svg' }, // Basketball
-            
-            // --- CUSTOM IMAGES (Weather Icons from Public Repo) ---
-            { type: 'image', content: 'https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/clear-day.svg' },
-            { type: 'image', content: 'https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/partly-cloudy-day.svg' },
-            { type: 'image', content: 'https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/rain.svg' },
-            { type: 'image', content: 'https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/snow.svg' },
-            { type: 'image', content: 'https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/thunderstorms.svg' },
-            
-            // --- CUSTOM IMAGES (Add school.svg here) ---
-            { type: 'image', content: './images/home.png' },
-            { type: 'image', content: './images/school-bus.png' },
-            { type: 'image', content: './images/y.png' },
-            { type: 'image', content: './images/ice skate.png' },
-            { type: 'image', content: './images/park.png' },
-            { type: 'image', content: './images/playdate.png' },
-        ];
+            const handleSpin = () => {
+                if (points < cost || isSpinning) return;
+                onSpin(cost, null); // Deduct cost
+                setIsSpinning(true); setPrize(null);
+                const randomSegment = Math.floor(Math.random() * activePrizes.length);
+                const extraDegrees = (360 - (randomSegment * (360/activePrizes.length))) - ((360/activePrizes.length) / 2);
+                setRotation(rotation + (360 * 5) + extraDegrees + (Math.random() * 20));
 
-        const StickerDrawer = ({ isOpen, onClose, onAdd }) => {
-            if (!isOpen) return null;
-            return (
-                <div className="fixed bottom-24 right-6 bg-white p-4 rounded-2xl shadow-2xl z-50 w-72 border border-slate-100 animate-pop">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-bold text-slate-700">Add Sticker</h3>
-                        <button onClick={onClose} className="text-slate-400 hover:text-slate-600">✕</button>
-                    </div>
-                    <div className="grid grid-cols-5 gap-2 max-h-64 overflow-y-auto">
-                        {AVAILABLE_STICKERS.map((s, i) => (
-                            <button key={i} onClick={() => onAdd(s)} className="w-12 h-12 flex items-center justify-center bg-slate-50 hover:bg-slate-100 rounded-lg text-2xl transition p-1">
-                                {s.type === 'emoji' && s.content}
-                                {s.type === 'icon' && React.createElement(Icons[s.content], { size: "w-6 h-6" })}
-                                {s.type === 'image' && <img src={s.content} className="w-full h-full object-contain" alt="sticker" />}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            );
-        };
-
-        const StickerLayer = ({ stickers, onUpdate, onRemove }) => {
-            const [draggingId, setDraggingId] = useState(null);
-            const [offset, setOffset] = useState({ x: 0, y: 0 });
-            const containerRef = useRef(null);
-
-            const handleStart = (e, id, startX, startY) => {
-                e.stopPropagation(); 
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                setDraggingId(id);
-                setOffset({ x: clientX - startX, y: clientY - startY });
+                setTimeout(() => {
+                    setIsSpinning(false);
+                    const result = activePrizes[randomSegment];
+                    setPrize(result);
+                    if (result.value !== 0 || result.type === 'sticker') {
+                        playCelebrationSound();
+                        triggerConfetti();
+                        onSpin(0, result);
+                    }
+                }, 4000);
             };
 
-            const handleMove = (e) => {
-                if (!draggingId) return;
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                onUpdate(draggingId, clientX - offset.x, clientY - offset.y);
-            };
-
-            const handleEnd = () => setDraggingId(null);
-
-            useEffect(() => {
-                if (draggingId) {
-                    window.addEventListener('mousemove', handleMove);
-                    window.addEventListener('mouseup', handleEnd);
-                    window.addEventListener('touchmove', handleMove, { passive: false });
-                    window.addEventListener('touchend', handleEnd);
-                }
-                return () => {
-                    window.removeEventListener('mousemove', handleMove);
-                    window.removeEventListener('mouseup', handleEnd);
-                    window.removeEventListener('touchmove', handleMove);
-                    window.removeEventListener('touchend', handleEnd);
-                };
-            }, [draggingId, offset]);
-
             return (
-                <div className="absolute inset-0 pointer-events-none overflow-hidden z-50">
-                    {stickers.map(s => (
-                        <div
-                            key={s.id}
-                            className="absolute pointer-events-auto cursor-move sticker transition-transform active:scale-110"
-                            style={{ left: s.x, top: s.y, transform: 'translate(-50%, -50%)' }}
-                            onMouseDown={(e) => handleStart(e, s.id, s.x, s.y)}
-                            onTouchStart={(e) => handleStart(e, s.id, s.x, s.y)}
-                            onDoubleClick={() => onRemove(s.id)}
-                        >
-                            {s.type === 'emoji' && <span className="text-6xl drop-shadow-md select-none leading-none">{s.content}</span>}
-                            {s.type === 'icon' && <div className="drop-shadow-md text-slate-800">{React.createElement(Icons[s.content], { size: "w-16 h-16" })}</div>}
-                            {s.type === 'image' && <img src={s.content} className="w-24 h-24 object-contain drop-shadow-md pointer-events-none" alt="sticker" />}
+                <div className="flex flex-col items-center justify-center py-4">
+                    <div className="relative w-56 h-56 mb-6">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-10 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[20px] border-t-red-500 drop-shadow-md"></div>
+                        <div className="w-full h-full rounded-full overflow-hidden border-4 border-white shadow-xl relative transition-transform" style={{ transform: `rotate(${rotation}deg)`, transitionDuration: isSpinning ? '4s' : '0s', transitionTimingFunction: 'cubic-bezier(0.25, 0.1, 0.25, 1)', background: `conic-gradient(${activePrizes.map((p, i) => `${p.color} ${i * (100/activePrizes.length)}% ${(i+1) * (100/activePrizes.length)}%`).join(', ')})` }}>
+                            {activePrizes.map((p, i) => (<div key={i} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-700" style={{ transform: `rotate(${i * (360 / activePrizes.length) + (360/activePrizes.length)/2}deg) translate(0, -70px) rotate(0deg)` }}>{p.label}</div>))}
                         </div>
-                    ))}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full shadow-lg border-2 border-gray-200 z-10"></div>
+                    </div>
+                    {prize && !isSpinning && <div className="mb-4 text-xl font-bold text-indigo-600 animate-bounce">{prize.type === 'sticker' ? 'New Sticker!' : `Won ${prize.value} pts!`}</div>}
+                    <button onClick={handleSpin} disabled={points < cost || isSpinning} className={`px-6 py-2 rounded-full font-bold text-white shadow-lg transition-all ${points >= cost && !isSpinning ? 'bg-indigo-500 hover:bg-indigo-600 active:scale-95' : 'bg-gray-300 cursor-not-allowed'}`}>{isSpinning ? '...' : `Spin (${cost} Pts)`}</button>
                 </div>
             );
         };
 
-        // --- COMPONENTS ---
+        const KidMode = ({ member, onUpdate, prizes }) => {
+            const [view, setView] = useState('tasks'); // tasks, shop, board, spin
+            const [selectedSticker, setSelectedSticker] = useState(null);
+            const boardRef = useRef(null);
+            const isLincoln = member.name === 'Lincoln';
 
-        const KennedyCalendar = ({ schedule }) => {
-            const today = new Date().getDay();
-            const currentMonth = new Date().toLocaleString('default', { month: 'long' }).toUpperCase();
-            const colors = ['bg-pink-50', 'bg-blue-50', 'bg-green-50', 'bg-yellow-50', 'bg-purple-50', 'bg-orange-50', 'bg-rose-50'];
+            // Available Stickers - Use member specific items or default
+            const defaultShop = [
+                { id: 101, type: 'emoji', content: '🦁', price: 20, name: 'Lion' },
+                { id: 102, type: 'emoji', content: '🚀', price: 30, name: 'Rocket' },
+                { id: 103, type: 'emoji', content: '🌈', price: 25, name: 'Rainbow' },
+                { id: 104, type: 'emoji', content: '🦖', price: 40, name: 'T-Rex' }
+            ];
             
-            // INCREASED KENNEDY ICONS & ADDED IMAGE SUPPORT
-            const getIcon = (type, size = "w-24 h-24") => {
-                const props = { className: `${size} drop-shadow-md transition hover:scale-110` };
+            const shopItems = member.shopItems || defaultShop;
+
+            // Helpers
+            const getInventory = () => member.inventory || [];
+            const getPlaced = () => member.placedStickers || [];
+
+            const handleToggleTask = (task) => {
+                const isNowDone = !task.isCompleted;
                 
-                // If the type looks like a file path (contains '.' or '/'), treat it as an image
-                if (type.includes('.') || type.includes('/')) {
-                     return <img src={type} className={`${size} object-contain transition hover:scale-110 drop-shadow-md`} alt="icon" />;
+                // If making it done, check daily logic
+                if (isNowDone) {
+                    playCelebrationSound();
+                    triggerConfetti();
                 }
 
-                if (FunIcons[type]) return React.createElement(FunIcons[type], props);
-                return <FunIcons.Home {...props} />;
+                const updatedTask = { 
+                    ...task, 
+                    isCompleted: isNowDone, 
+                    lastCompleted: isNowDone ? new Date().toISOString() : null 
+                };
+
+                const newTasks = member.tasks.map(t => t.id === task.id ? updatedTask : t);
+                const scoreDelta = isNowDone ? task.p : -task.p;
+                onUpdate({ ...member, tasks: newTasks, score: Math.max(0, member.score + scoreDelta) });
             };
 
+            const buySticker = (item) => {
+                if (member.score >= item.price) {
+                    playCelebrationSound();
+                    const newInv = [...getInventory(), { ...item, uniqueId: Date.now() }];
+                    onUpdate({ ...member, score: member.score - item.price, inventory: newInv });
+                }
+            };
+
+            const handleSpinResult = (cost, prize) => {
+                let newScore = member.score - cost;
+                let newInv = getInventory();
+                
+                if (prize) {
+                    if (prize.type === 'sticker') {
+                        const randomItem = shopItems[Math.floor(Math.random() * shopItems.length)];
+                        newInv = [...newInv, { ...randomItem, uniqueId: Date.now() }];
+                    } else if (prize.value) {
+                        newScore += parseInt(prize.value);
+                    }
+                }
+                onUpdate({ ...member, score: Math.max(0, newScore), inventory: newInv });
+            };
+
+            const placeSticker = (stickerId, x, y) => {
+                const sticker = getInventory().find(s => s.id === stickerId); // Simplified finding logic (assuming uniqueId)
+                // In real app we might want to track specific instances, but let's just clone details
+                // Correct logic: we need to find the specific item in inventory if we drag from inventory bar
+                // But the drag only passes ID. Let's find first matching item type.
+                // Or better: pass the uniqueId in drag.
+                // For simplicity here, we assume if you have one, you can place one (cloning it to board doesn't remove from inventory in this simple version, or does it?
+                // Typically you buy once, place multiple? Or buy one, place one? 
+                // Let's assume buy once, place multiple for now to be kid friendly, unless user wants "consumable" stickers.
+                if (sticker) {
+                    const newPlaced = [...getPlaced(), { uid: Date.now(), type: sticker.type, content: sticker.content, x, y }];
+                    onUpdate({ ...member, placedStickers: newPlaced });
+                }
+            };
+            
+            const removePlaced = (uid) => {
+                onUpdate({ ...member, placedStickers: getPlaced().filter(s => s.uid !== uid) });
+            };
+
+            const handleBoardDrop = (e) => {
+                e.preventDefault();
+                if (!boardRef.current) return;
+                const rect = boardRef.current.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                const sId = e.dataTransfer.getData("sid");
+                // Handle different ID types (string vs number)
+                if (sId) placeSticker(sId, x, y);
+            };
+
+            // Touch support for placing stickers
+            const handleBoardTouch = (e) => {
+                if(selectedSticker && boardRef.current) {
+                    const rect = boardRef.current.getBoundingClientRect();
+                    const t = e.changedTouches[0];
+                    const x = ((t.clientX - rect.left) / rect.width) * 100;
+                    const y = ((t.clientY - rect.top) / rect.height) * 100;
+                    placeSticker(selectedSticker.id, x, y);
+                    setSelectedSticker(null);
+                }
+            }
+
             return (
-                <div className="card h-full flex flex-col p-8 bg-white border border-slate-100 relative overflow-hidden">
-                    <div className="text-center mb-8">
-                        <div className="font-kids text-5xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 font-extrabold tracking-tight">KENNEDY'S WEEK</div>
-                        <div className="font-kids text-2xl text-slate-400 font-bold tracking-widest mt-2">{currentMonth}</div>
+                <div className="card h-full flex flex-col border-0 shadow-lg relative overflow-hidden bg-white">
+                    {/* Header */}
+                    <div className={`p-4 flex justify-between items-center ${member.color.split(' ')[0]} bg-opacity-30`}>
+                        <div className="flex items-center gap-2">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${member.color.split(' ')[0]}`}>{member.name[0]}</div>
+                            <div>
+                                <h3 className="font-bold text-xl text-slate-800 leading-none">{member.name}'s World</h3>
+                                <div className="text-xs text-slate-500 font-bold">{member.goalName}</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-1 bg-yellow-100 px-3 py-1 rounded-full border border-yellow-200">
+                            <Icons.Star className="w-4 h-4 text-yellow-600 fill-yellow-600" />
+                            <span className="font-black text-yellow-700">{member.score}</span>
+                        </div>
                     </div>
-                    <div className="flex-1 grid grid-cols-7 gap-4">
-                        {schedule.map((item, index) => {
-                            const isToday = index === today;
-                            const icons = Array.isArray(item.icon) ? item.icon : [item.icon];
-                            const hasMultiple = icons.length > 1;
-                            return (
-                                <div key={index} className="flex flex-col items-center justify-center relative">
-                                    {isToday && <div className="absolute -top-14 w-32 h-16 animate-float z-20"><Icons.Rainbow /></div>}
-                                    <div className={`relative z-10 w-full h-full flex flex-col items-center ${hasMultiple ? 'justify-start pt-4' : 'justify-center'} rounded-3xl border-4 transition-all duration-300 ${isToday ? 'bg-yellow-100 border-yellow-300 shadow-xl scale-105' : `${colors[index]} border-transparent opacity-90`}`}>
-                                        <div className={`font-kids text-xl mb-2 uppercase tracking-wider font-bold ${isToday ? 'text-yellow-700' : 'text-slate-400'}`}>{item.day.substring(0, 3)}</div>
-                                        
-                                        {/* Changed flex-wrap to flex-col for column layout */}
-                                        <div className={`flex flex-col justify-center items-center gap-1 ${hasMultiple ? 'flex-1 w-full' : ''}`}>
-                                            {icons.map((iconName, i) => (
-                                                <div key={i} className="flex flex-col items-center">
-                                                    {/* Adjusted size logic: slightly smaller if multiple to fit vertically */}
-                                                    {getIcon(iconName, hasMultiple ? "w-16 h-16" : "w-24 h-24")}
+
+                    {/* Content */}
+                    <div className="flex-1 overflow-y-auto bg-slate-50 relative">
+                        {view === 'tasks' && (
+                            <div className="p-4 space-y-3">
+                                {member.tasks.length === 0 && <div className="text-center text-slate-400 mt-10">No missions yet!</div>}
+                                {member.tasks.map(task => (
+                                    <div key={task.id} className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all ${task.isCompleted ? 'bg-green-50 border-green-200 opacity-60' : 'bg-white border-white hover:border-indigo-200'}`}>
+                                        <div className="flex items-center gap-3">
+                                            <button onClick={() => handleToggleTask(task)} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${task.isCompleted ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-300'}`}>
+                                                {task.isCompleted ? <Icons.CheckCircle2 /> : <Icons.Circle />}
+                                            </button>
+                                            <div>
+                                                <div className={`font-bold ${task.isCompleted ? 'line-through text-slate-400' : 'text-slate-700'}`}>{task.t}</div>
+                                                {task.isDaily && <div className="flex items-center gap-1 text-[10px] text-orange-400 font-bold uppercase"><Icons.Repeat size={10}/> Daily</div>}
+                                            </div>
+                                        </div>
+                                        <div className="text-xs font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-full">+{task.p}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {view === 'shop' && (
+                            <div className="p-4 grid grid-cols-3 gap-3">
+                                {shopItems.map(item => (
+                                    <button key={item.id} onClick={() => buySticker(item)} disabled={member.score < item.price} className={`flex flex-col items-center p-3 rounded-xl border-2 ${member.score >= item.price ? 'bg-white border-indigo-100 hover:border-indigo-400' : 'bg-slate-100 opacity-50'}`}>
+                                        <div className="text-3xl mb-1 h-12 flex items-center justify-center">
+                                            {item.type === 'image' ? <img src={item.content} className="h-full w-full object-contain" /> : item.content}
+                                        </div>
+                                        <div className="text-[10px] font-bold text-slate-500">{item.name}</div>
+                                        <div className="text-xs font-bold text-indigo-500 mt-1">{item.price}</div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {view === 'board' && (
+                            <div className="flex flex-col h-full">
+                                <div 
+                                    ref={boardRef} 
+                                    onDrop={handleBoardDrop} 
+                                    onDragOver={e=>e.preventDefault()} 
+                                    onTouchEnd={handleBoardTouch} 
+                                    className={`flex-1 relative overflow-hidden border-b-4 ${isLincoln ? 'bg-slate-900 border-red-600' : 'bg-gradient-to-b from-blue-300 to-green-300 border-indigo-200'}`}
+                                >
+                                    {isLincoln ? (
+                                        // Lincoln's Pokeball Grid Background
+                                        <div className="absolute inset-0 grid grid-cols-4 sm:grid-cols-5 gap-4 p-6 content-start opacity-40 pointer-events-none">
+                                            {Array.from({length: 30}).map((_, i) => (
+                                                <div key={i} className="aspect-square rounded-full border-4 border-slate-700 bg-slate-800 relative flex items-center justify-center shadow-inner overflow-hidden">
+                                                    <div className="absolute top-0 w-full h-1/2 bg-red-900/40 border-b-4 border-slate-700"></div>
+                                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 h-1/3 bg-slate-900 rounded-full border-4 border-slate-700 z-10"></div>
                                                 </div>
                                             ))}
                                         </div>
-                                    </div>
+                                    ) : (
+                                        // Kennedy's Scene Background
+                                        <>
+                                            <div className="absolute bottom-0 w-full h-1/3 bg-green-500 rounded-t-[50%] scale-150 translate-y-10 opacity-80 pointer-events-none"></div>
+                                            <div className="absolute top-4 right-4 text-yellow-300 opacity-80 pointer-events-none"><div className="w-12 h-12 bg-yellow-400 rounded-full blur-sm"></div></div>
+                                        </>
+                                    )}
+                                    
+                                    {getPlaced().map(s => (
+                                        <div key={s.uid} onClick={() => removePlaced(s.uid)} className="absolute text-4xl cursor-pointer hover:scale-110 transition-transform" style={{ left: `${s.x}%`, top: `${s.y}%`, transform: 'translate(-50%, -50%)' }}>
+                                            {s.type === 'image' ? <img src={s.content} className="w-16 h-16 object-contain drop-shadow-md" /> : s.content}
+                                        </div>
+                                    ))}
+                                    {selectedSticker && <div className="absolute inset-0 bg-black/10 flex items-center justify-center pointer-events-none"><div className="bg-white px-3 py-1 rounded-full text-xs font-bold animate-bounce">Tap where to place sticker</div></div>}
                                 </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            );
-        };
-
-        const TimerWidget = () => {
-            const [timeLeft, setTimeLeft] = useState(0);
-            const [isActive, setIsActive] = useState(false);
-            const [customInput, setCustomInput] = useState("");
-            
-            useEffect(() => {
-                let interval = null;
-                if (isActive && timeLeft > 0) interval = setInterval(() => setTimeLeft(t => t - 1), 1000);
-                else if (timeLeft === 0) setIsActive(false);
-                return () => clearInterval(interval);
-            }, [isActive, timeLeft]);
-
-            const formatTime = (seconds) => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
-            const addTime = (min) => { setTimeLeft(min * 60); setIsActive(true); };
-
-            return (
-                <div className={`card h-full flex flex-col p-6 shadow-xl border-slate-700 transition-colors duration-500 ${timeLeft === 0 && !isActive ? 'bg-slate-800' : (timeLeft === 0 ? 'animate-alarm' : 'bg-slate-800')}`}>
-                    <div className="flex items-center gap-2 mb-4 text-slate-400 text-sm font-bold uppercase tracking-wider"><Icons.Timer /> Timer</div>
-                    <div className="flex-1 flex items-center justify-center"><div className={`text-7xl font-mono font-bold ${timeLeft === 0 && !isActive ? 'text-slate-600' : 'text-white'}`}>{formatTime(timeLeft)}</div></div>
-                    <div className="grid grid-cols-4 gap-2 mb-4">{[1, 5, 15, 30].map(m => <button key={m} onClick={() => addTime(m)} className="bg-slate-700 hover:bg-slate-600 py-3 rounded-lg text-white font-bold transition">+{m}</button>)}</div>
-                    <div className="flex gap-3">
-                        <button onClick={() => setIsActive(!isActive)} className={`flex-1 py-3 rounded-xl font-bold text-lg transition ${isActive ? 'bg-yellow-500 text-yellow-900' : 'bg-emerald-500 text-white'}`}>{isActive ? 'Pause' : 'Start'}</button>
-                        <button onClick={() => { setIsActive(false); setTimeLeft(0); }} className="px-4 py-3 rounded-xl font-bold bg-slate-700 text-slate-300 hover:bg-red-500/20 hover:text-red-300 transition">Reset</button>
-                    </div>
-                </div>
-            );
-        };
-        
-        // --- FACT WIDGET ---
-        const FactWidget = () => {
-            const facts = [
-                "Octopuses have three hearts.",
-                "Honey never spoils.",
-                "Bananas are curved because they grow towards the sun.",
-                "A cloud can weigh more than a million pounds.",
-                "Wombat poop is cube-shaped.",
-                "You can't hum while holding your nose.",
-                "A group of flamingos is called a 'flamboyance'.",
-                "Sloths can hold their breath longer than dolphins.",
-                "Apples float because they are 25% air.",
-                "A day on Venus is longer than a year on Venus."
-            ];
-            const [fact, setFact] = useState(facts[0]);
-            
-            const newFact = () => {
-                const random = facts[Math.floor(Math.random() * facts.length)];
-                setFact(random);
-            };
-
-            useEffect(() => newFact(), []);
-
-            return (
-                <div onClick={newFact} className="card p-6 h-full flex flex-col items-center justify-center text-center cursor-pointer relative bg-gradient-to-br from-teal-50 to-emerald-50 hover:shadow-xl transition border-2 border-emerald-100 select-none">
-                    <div className="absolute top-4 left-4 text-emerald-500 text-xs font-bold uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full flex items-center gap-1"><Icons.Lightbulb size="w-4 h-4"/> Fun Fact</div>
-                    <div className="mt-6 font-kids text-2xl text-slate-700 font-bold leading-snug">
-                        {fact}
-                    </div>
-                    <div className="mt-4 text-xs font-bold text-emerald-400 opacity-60 uppercase tracking-wide">Tap for new fact</div>
-                </div>
-            );
-        };
-
-        // --- Standard Widgets ---
-        const Clock = () => {
-            const [time, setTime] = useState(new Date());
-            useEffect(() => { const t = setInterval(() => setTime(new Date()), 1000); return () => clearInterval(t); }, []);
-            return (
-                <div className="flex flex-col drop-shadow-md">
-                    <h1 className="text-8xl font-bold tracking-tight text-slate-800 leading-none">{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).replace(/\s[AP]M/, '')}<span className="text-2xl text-slate-400 font-medium ml-1">{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).slice(-2)}</span></h1>
-                    <p className="text-3xl text-slate-500 font-light mt-1">{time.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}</p>
-                </div>
-            );
-        };
-
-        const Weather = ({ lat, lon }) => {
-            const [data, setData] = useState(null);
-            
-            useEffect(() => {
-                const f = async () => { 
-                    try { 
-                        const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&timezone=auto`); 
-                        const d = await r.json(); 
-                        setData(d); 
-                    } catch (e) {} 
-                };
-                f(); 
-                const t = setInterval(f, 600000); 
-                return () => clearInterval(t);
-            }, [lat, lon]);
-
-            if (!data) return <div className="text-slate-300">Loading...</div>;
-            
-            const getIconUrl = (c) => {
-                // Map WMO codes to specific icon images from a reliable source (basmilius/weather-icons)
-                // Codes: 0=Clear, 1-3=Cloudy, 45/48=Fog, 51-67=Rain, 71-77=Snow, 80-82=Showers, 95-99=Thunder
-                if (c === 0) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/clear-day.svg";
-                if (c === 1) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/partly-cloudy-day.svg";
-                if (c === 2) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/partly-cloudy-day.svg";
-                if (c === 3) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/overcast.svg";
-                if (c >= 45 && c <= 48) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/fog.svg";
-                if (c >= 51 && c <= 67) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/rain.svg";
-                if (c >= 71 && c <= 77) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/snow.svg";
-                if (c >= 80 && c <= 82) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/rain.svg";
-                if (c >= 85 && c <= 86) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/snow.svg";
-                if (c >= 95) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/thunderstorms.svg";
-                return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/clear-day.svg";
-            };
-
-            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            const today = new Date().getDay();
-            const day1 = (today + 1) % 7;
-            const day2 = (today + 2) % 7;
-
-            return (
-                <div className="flex items-center gap-6 bg-gradient-to-br from-sky-400 to-blue-500 px-6 py-4 rounded-3xl shadow-lg border border-white/10 text-white">
-                    <div className="flex items-center gap-4">
-                        <div className="text-right">
-                            <div className="text-5xl font-bold text-white drop-shadow-md">{Math.round(data.current_weather.temperature)}°</div>
-                            <div className="text-xs font-bold uppercase tracking-wider opacity-80">Now</div>
-                        </div>
-                        <img src={getIconUrl(data.current_weather.weathercode)} className="w-16 h-16 drop-shadow-md" alt="weather" />
-                    </div>
-                    
-                    <div className="w-px h-16 bg-white/30"></div>
-
-                    <div className="flex gap-4">
-                         <div className="flex flex-col items-center">
-                            <div className="text-xs font-bold text-slate-400 uppercase mb-1">{days[day1]}</div>
-                            <img src={getIconUrl(data.daily.weathercode[1])} className="w-8 h-8 drop-shadow-sm" alt="forecast" />
-                            <div className="text-sm font-bold text-slate-700 mt-1">{Math.round(data.daily.temperature_2m_max[1])}°</div>
-                         </div>
-                         <div className="flex flex-col items-center">
-                            <div className="text-xs font-bold text-slate-400 uppercase mb-1">{days[day2]}</div>
-                            <img src={getIconUrl(data.daily.weathercode[2])} className="w-8 h-8 drop-shadow-sm" alt="forecast" />
-                            <div className="text-sm font-bold text-slate-700 mt-1">{Math.round(data.daily.temperature_2m_max[2])}°</div>
-                         </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const Traffic = ({ apiKey, routes }) => {
-            const [durations, setDurations] = useState({});
-            useEffect(() => {
-                if (!apiKey || !routes) return;
-                const getRoute = () => { 
-                    if (!window.google || !window.google.maps) return;
-                    routes.forEach((route, index) => {
-                        const ds = new window.google.maps.DirectionsService();
-                        ds.route({ origin: route.origin, destination: route.destination, travelMode: 'DRIVING', drivingOptions: { departureTime: new Date() } }, (res, stat) => { 
-                            if(stat === 'OK') {
-                                const time = res.routes[0].legs[0].duration_in_traffic ? res.routes[0].legs[0].duration_in_traffic.text : res.routes[0].legs[0].duration.text;
-                                setDurations(prev => ({...prev, [index]: time}));
-                            }
-                        });
-                    });
-                };
-                if (!window.google) { const s = document.createElement("script"); s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`; s.async = true; s.onload = getRoute; document.body.appendChild(s); } else { getRoute(); }
-                const t = setInterval(getRoute, 900000); return () => clearInterval(t);
-            }, [apiKey, routes]);
-            return (
-                <div className="card h-full p-6 flex flex-col justify-center bg-white gap-4 relative">
-                    <div className="flex items-center gap-2 border-b border-slate-50 pb-2"><div className="bg-emerald-100 p-1.5 rounded-full"><Icons.Car /></div><span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Commute</span></div>
-                    <div className="space-y-4">{routes.map((route, i) => (<div key={i} className="flex justify-between items-end"><div><div className="text-3xl font-bold text-slate-800 leading-none tracking-tight">{durations[i] || '--'}</div><div className="text-xs text-slate-500 mt-1 font-bold uppercase">{route.label}</div></div><div className="text-[10px] text-slate-300 max-w-[80px] truncate text-right">{route.destination.split(',')[0]}</div></div>))}</div>
-                </div>
-            );
-        };
-
-        const Photos = ({ images, embedUrl }) => {
-            const [idx, setIdx] = useState(0);
-            useEffect(() => { if (!embedUrl) { const t = setInterval(() => setIdx(i => (i + 1) % images.length), 10000); return () => clearInterval(t); } }, [images, embedUrl]);
-            if (embedUrl) return <div className="card w-full h-full relative border-0 shadow-lg bg-black"><iframe src={embedUrl} className="w-full h-full border-none" scrolling="no" /></div>;
-            return <div className="card w-full h-full relative border-0 shadow-lg bg-slate-200"><img src={images[idx]} className="w-full h-full object-cover absolute inset-0 transition-opacity duration-1000" /></div>;
-        };
-
-        const GroceryList = ({ url }) => (
-            <div className="card h-full flex flex-col fade-in border-0 shadow-lg relative overflow-hidden">
-                {!url ? <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-slate-50"><div className="bg-emerald-100 p-4 rounded-full mb-4"><Icons.Cart /></div><h3 className="font-bold text-xl text-slate-800 mb-2">Synced Grocery List</h3><p className="text-slate-500 text-sm mb-6">Use OurGroceries or Todoist URL in Settings.</p></div> : <iframe src={url} className="w-full h-full border-none" />}
-            </div>
-        );
-
-        const ToDoWidget = () => {
-            const [todos, setTodos] = useState(() => JSON.parse(localStorage.getItem('parentTodos')) || [{ id: 1, text: 'Pay electric bill', done: false }]);
-            const [newTodo, setNewTodo] = useState("");
-            useEffect(() => localStorage.setItem('parentTodos', JSON.stringify(todos)), [todos]);
-            const addTodo = (e) => { e.preventDefault(); if (!newTodo.trim()) return; setTodos([...todos, { id: Date.now(), text: newTodo, done: false }]); setNewTodo(""); };
-            return (
-                <div className="card h-full flex flex-col fade-in border-0 shadow-lg">
-                    <div className="card-header bg-white pt-6 pb-4 border-b-0"><div className="flex items-center justify-between mb-4"><h3 className="font-bold text-2xl text-slate-800">To-Dos</h3></div><form onSubmit={addTodo} className="flex gap-2"><input className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 outline-none" placeholder="Add task..." value={newTodo} onChange={(e) => setNewTodo(e.target.value)} /><button type="submit" className="bg-blue-600 text-white px-5 py-2 rounded-xl font-bold">Add</button></form></div>
-                    <div className="p-6 space-y-3 overflow-y-auto flex-1 bg-slate-50/50">{todos.map(todo => (<div key={todo.id} className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><div onClick={() => setTodos(todos.map(t => t.id === todo.id ? { ...t, done: !t.done } : t))} className="flex items-center gap-3 flex-1 cursor-pointer"><div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${todo.done ? 'bg-green-500 border-green-500' : 'border-slate-300'}`}>{todo.done && <span className="text-white text-xs">✓</span>}</div><span className={todo.done ? 'text-slate-400 line-through' : 'text-slate-700'}>{todo.text}</span></div><button onClick={() => setTodos(todos.filter(t => t.id !== todo.id))} className="text-slate-300 hover:text-red-400">✕</button></div>))}</div>
-                </div>
-            );
-        };
-
-        const TaskList = ({ member, onUpdateScore, onResetScore }) => {
-            const tasks = member.tasks || [];
-            const percent = Math.min(100, (member.score / (member.goalTarget || 100)) * 100);
-            return (
-                <div className="card h-full flex flex-col fade-in border-0 shadow-lg">
-                    <div className="card-header bg-white pt-6 pb-4"><div className="flex justify-between items-center mb-4"><div className="flex items-center gap-3"><div className={`w-3 h-8 rounded-full ${member.color.split(' ')[0]}`}></div><div><h3 className="font-bold text-2xl text-slate-800">{member.name}'s Tasks</h3><div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Goal: {member.goalName}</div></div></div><div className="text-right"><span className="text-3xl font-bold text-slate-800">{member.score}</span><span className="text-sm text-slate-400 font-medium"> / {member.goalTarget}</span></div></div><div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden"><div className={`h-full progress-fill ${member.color.split(' ')[0]}`} style={{width: `${percent}%`}}></div></div></div>
-                    <div className="p-6 space-y-3 overflow-y-auto flex-1 bg-slate-50/50">
-                        {tasks.map(task => (<div key={task.id} className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-100 shadow-sm active:scale-[0.99] cursor-pointer" onClick={() => onUpdateScore(member.id, task.p)}><span className="text-lg font-medium text-slate-700">{task.t}</span><span className={`px-3 py-1 rounded-lg text-sm font-bold ${member.color}`}>+{task.p}</span></div>))}
-                        
-                        {/* Correction Controls */}
-                        <div className="mt-6 pt-4 border-t border-slate-200">
-                            <p className="text-xs font-bold text-slate-400 uppercase mb-2">Corrections</p>
-                            <div className="flex gap-3">
-                                <button onClick={() => onUpdateScore(member.id, -10)} className="flex-1 py-2 bg-red-50 text-red-600 font-bold rounded-lg hover:bg-red-100 transition">Undo (-10)</button>
-                                <button onClick={() => onResetScore(member.id)} className="flex-1 py-2 bg-slate-100 text-slate-500 font-bold rounded-lg hover:bg-slate-200 transition">Reset (0)</button>
+                                <div className="h-20 bg-indigo-50 p-2 flex gap-2 overflow-x-auto items-center">
+                                    {getInventory().length === 0 ? <div className="text-xs text-slate-400 w-full text-center">Visit Shop!</div> : getInventory().map((s,i) => (
+                                        <div key={i} draggable onDragStart={(e) => e.dataTransfer.setData("sid", s.id)} onClick={() => setSelectedSticker(selectedSticker === s ? null : s)} className={`flex-shrink-0 w-14 h-14 bg-white rounded-lg flex items-center justify-center text-2xl border-2 ${selectedSticker === s ? 'border-indigo-500 bg-indigo-100' : 'border-slate-200'}`}>
+                                            {s.type === 'image' ? <img src={s.content} className="w-10 h-10 object-contain" /> : s.content}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
+
+                        {view === 'spin' && (
+                            <div className="h-full flex items-center justify-center">
+                                <SpinWheel onSpin={handleSpinResult} cost={20} points={member.score} prizes={prizes} />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Nav */}
+                    <div className="flex border-t border-slate-100 bg-white">
+                        <button onClick={() => setView('tasks')} className={`flex-1 py-3 flex flex-col items-center ${view === 'tasks' ? 'text-indigo-600' : 'text-slate-400'}`}><Icons.CheckCircle2 size={20}/><span className="text-[10px] font-bold">Missions</span></button>
+                        <button onClick={() => setView('shop')} className={`flex-1 py-3 flex flex-col items-center ${view === 'shop' ? 'text-indigo-600' : 'text-slate-400'}`}><Icons.Gift size={20}/><span className="text-[10px] font-bold">Shop</span></button>
+                        <button onClick={() => setView('board')} className={`flex-1 py-3 flex flex-col items-center ${view === 'board' ? 'text-indigo-600' : 'text-slate-400'}`}><Icons.Palette size={20}/><span className="text-[10px] font-bold">Board</span></button>
+                        <button onClick={() => setView('spin')} className={`flex-1 py-3 flex flex-col items-center ${view === 'spin' ? 'text-indigo-600' : 'text-slate-400'}`}><Icons.Gamepad2 size={20}/><span className="text-[10px] font-bold">Spin</span></button>
                     </div>
                 </div>
             );
         };
 
-        const CalendarView = ({ memberUrl, defaultUrl }) => {
-            const url = memberUrl || defaultUrl;
-            const src = url.match(/src="([^"]+)"/)?.[1] || "";
-            return (
-                <div className="card h-full flex flex-col fade-in border-0 shadow-lg">
-                    <div className="card-header bg-white py-4"><h3 className="font-bold text-xl text-slate-800 flex items-center gap-2"><Icons.Calendar /> Schedule</h3></div>
-                    <div className="flex-1 calendar-wrapper bg-white">{src ? <iframe src={src} scrolling="no" /> : <div className="h-full flex items-center justify-center text-slate-400">No Calendar Linked</div>}</div>
-                </div>
-            );
+        // ... Keeping other utility widgets (KennedyCalendar, TimerWidget, etc.) same as original ...
+        const KennedyCalendar = ({ schedule }) => {
+            const today = new Date().getDay(); const currentMonth = new Date().toLocaleString('default', { month: 'long' }).toUpperCase(); const colors = ['bg-pink-50', 'bg-blue-50', 'bg-green-50', 'bg-yellow-50', 'bg-purple-50', 'bg-orange-50', 'bg-rose-50'];
+            const getIcon = (type, size = "w-24 h-24") => { const props = { className: `${size} drop-shadow-md transition hover:scale-110` }; if (type.includes('.') || type.includes('/')) { return <img src={type} className={`${size} object-contain transition hover:scale-110 drop-shadow-md`} alt="icon" />; } if (FunIcons[type]) return React.createElement(FunIcons[type], props); return <FunIcons.Home {...props} />; };
+            return ( <div className="card h-full flex flex-col p-8 bg-white border border-slate-100 relative overflow-hidden"> <div className="text-center mb-8"> <div className="font-kids text-5xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 font-extrabold tracking-tight">KENNEDY'S WEEK</div> <div className="font-kids text-2xl text-slate-400 font-bold tracking-widest mt-2">{currentMonth}</div> </div> <div className="flex-1 grid grid-cols-7 gap-4"> {schedule.map((item, index) => { const isToday = index === today; const icons = Array.isArray(item.icon) ? item.icon : [item.icon]; const hasMultiple = icons.length > 1; return ( <div key={index} className="flex flex-col items-center justify-center relative"> {isToday && <div className="absolute -top-14 w-32 h-16 animate-float z-20"><Icons.Rainbow /></div>} <div className={`relative z-10 w-full h-full flex flex-col items-center ${hasMultiple ? 'justify-start pt-4' : 'justify-center'} rounded-3xl border-4 transition-all duration-300 ${isToday ? 'bg-yellow-100 border-yellow-300 shadow-xl scale-105' : `${colors[index]} border-transparent opacity-90`}`}> <div className={`font-kids text-xl mb-2 uppercase tracking-wider font-bold ${isToday ? 'text-yellow-700' : 'text-slate-400'}`}>{item.day.substring(0, 3)}</div> <div className={`flex flex-col justify-center items-center gap-1 ${hasMultiple ? 'flex-1 w-full' : ''}`}> {icons.map((iconName, i) => ( <div key={i} className="flex flex-col items-center"> {getIcon(iconName, hasMultiple ? "w-16 h-16" : "w-24 h-24")} </div> ))} </div> </div> </div> ); })} </div> </div> );
         };
-
-        const AppleMusicPlayer = ({ playlists }) => {
-            const [activeUrl, setActiveUrl] = useState(playlists[0]?.url || "");
-            const getEmbedUrl = (url) => url ? url.replace("music.apple.com", "embed.music.apple.com") : "";
-            return (
-                <div className="card h-full flex flex-col p-6 bg-white border-2 border-pink-100 shadow-xl">
-                    <h3 className="text-pink-400 font-kids text-3xl mb-4 flex items-center gap-3 font-bold"><Icons.Music /> DJ Station</h3>
-                    <div className="flex-1 music-container bg-pink-50 rounded-2xl overflow-hidden shadow-inner mb-6 relative"><iframe src={getEmbedUrl(activeUrl)} width="100%" height="100%" allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" className="absolute inset-0"></iframe></div>
-                    <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">{playlists.map((pl, i) => (<button key={i} onClick={() => setActiveUrl(pl.url)} className={`flex-1 min-w-[120px] py-4 px-4 rounded-xl font-kids text-lg font-bold shadow-md ${activeUrl === pl.url ? 'bg-pink-500 text-white ring-4 ring-pink-200' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}>{pl.name}</button>))}</div>
-                </div>
-            );
-        };
-
-        const JokeWidget = () => {
-            const [joke, setJoke] = useState(null);
-            const [showPunchline, setShowPunchline] = useState(false);
-            const fetchJoke = async () => { setShowPunchline(false); try { const res = await fetch('https://official-joke-api.appspot.com/jokes/random'); const data = await res.json(); setJoke(data); } catch (e) { setJoke({ setup: "Why did the chicken cross?", punchline: "To get to the other side!" }); } };
-            useEffect(() => { fetchJoke(); }, []);
-            return (
-                <div onClick={() => showPunchline ? fetchJoke() : setShowPunchline(true)} className="card p-8 h-full flex flex-col items-center justify-center text-center cursor-pointer relative bg-gradient-to-br from-indigo-50 to-purple-50 hover:shadow-xl transition border-2 border-purple-100 select-none">
-                    <div className="absolute top-6 left-6 text-purple-400 text-sm font-bold uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full flex items-center gap-1"><Icons.Smile /> Joke of the Day</div>
-                    {joke ? (<div className="mt-8 flex flex-col items-center justify-center h-full w-full"><div className="font-kids text-4xl text-slate-800 mb-8 leading-snug font-bold max-w-md">{joke.setup}</div>{showPunchline ? <div className="font-kids text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600 animate-pop leading-tight drop-shadow-sm">{joke.punchline}<div className="text-sm font-sans font-medium text-slate-400 mt-6 opacity-60">(Tap for another)</div></div> : <button className="bg-purple-500 text-white px-8 py-3 rounded-full text-xl font-bold shadow-lg shadow-purple-200 hover:bg-purple-600 transition transform hover:-translate-y-1">Tap for Answer</button>}</div>) : <div className="animate-pulse text-2xl font-kids text-slate-300">Finding a good one...</div>}
-                </div>
-            );
-        };
-
-        const Countdown = ({ targetDate, title }) => {
-            const [timeLeft, setTimeLeft] = useState("");
-            useEffect(() => { const calc = () => { const diff = new Date(targetDate).getTime() - new Date().getTime(); setTimeLeft(diff < 0 ? "Hooray!" : `${Math.floor(diff / (1000 * 60 * 60 * 24))} Days`); }; calc(); }, [targetDate]);
-            return (
-                <div className="card px-8 flex flex-row items-center justify-between h-full bg-blue-50 border-2 border-blue-100 shadow-md">
-                    <div className="flex items-center gap-4"><div className="bg-blue-200 p-2 rounded-lg text-blue-700"><Icons.Calendar /></div><div><div className="text-blue-400 uppercase tracking-widest text-xs font-bold">Countdown</div><div className="font-kids text-2xl text-blue-900 font-bold">{title}</div></div></div><div className="font-kids text-5xl font-extrabold text-blue-500">{timeLeft}</div>
-                </div>
-            );
-        };
+        const TimerWidget = () => { const [timeLeft, setTimeLeft] = useState(0); const [isActive, setIsActive] = useState(false); useEffect(() => { let interval = null; if (isActive && timeLeft > 0) interval = setInterval(() => setTimeLeft(t => t - 1), 1000); else if (timeLeft === 0) setIsActive(false); return () => clearInterval(interval); }, [isActive, timeLeft]); const formatTime = (seconds) => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`; const addTime = (min) => { setTimeLeft(min * 60); setIsActive(true); }; return ( <div className={`card h-full flex flex-col p-6 shadow-xl border-slate-700 transition-colors duration-500 ${timeLeft === 0 && !isActive ? 'bg-slate-800' : (timeLeft === 0 ? 'animate-alarm' : 'bg-slate-800')}`}> <div className="flex items-center gap-2 mb-4 text-slate-400 text-sm font-bold uppercase tracking-wider"><Icons.Timer /> Timer</div> <div className="flex-1 flex items-center justify-center"><div className={`text-7xl font-mono font-bold ${timeLeft === 0 && !isActive ? 'text-slate-600' : 'text-white'}`}>{formatTime(timeLeft)}</div></div> <div className="grid grid-cols-4 gap-2 mb-4">{[1, 5, 15, 30].map(m => <button key={m} onClick={() => addTime(m)} className="bg-slate-700 hover:bg-slate-600 py-3 rounded-lg text-white font-bold transition">+{m}</button>)}</div> <div className="flex gap-3"> <button onClick={() => setIsActive(!isActive)} className={`flex-1 py-3 rounded-xl font-bold text-lg transition ${isActive ? 'bg-yellow-500 text-yellow-900' : 'bg-emerald-500 text-white'}`}>{isActive ? 'Pause' : 'Start'}</button> <button onClick={() => { setIsActive(false); setTimeLeft(0); }} className="px-4 py-3 rounded-xl font-bold bg-slate-700 text-slate-300 hover:bg-red-500/20 hover:text-red-300 transition">Reset</button> </div> </div> ); };
+        const FactWidget = () => { const facts = [ "Octopuses have three hearts.", "Honey never spoils.", "Bananas are curved because they grow towards the sun.", "A cloud can weigh more than a million pounds.", "Wombat poop is cube-shaped.", "You can't hum while holding your nose.", "A group of flamingos is called a 'flamboyance'.", "Sloths can hold their breath longer than dolphins.", "Apples float because they are 25% air.", "A day on Venus is longer than a year on Venus." ]; const [fact, setFact] = useState(facts[0]); const newFact = () => { const random = facts[Math.floor(Math.random() * facts.length)]; setFact(random); }; useEffect(() => newFact(), []); return ( <div onClick={newFact} className="card p-6 h-full flex flex-col items-center justify-center text-center cursor-pointer relative bg-gradient-to-br from-teal-50 to-emerald-50 hover:shadow-xl transition border-2 border-emerald-100 select-none"> <div className="absolute top-4 left-4 text-emerald-500 text-xs font-bold uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full flex items-center gap-1"><Icons.Lightbulb size="w-4 h-4"/> Fun Fact</div> <div className="mt-6 font-kids text-2xl text-slate-700 font-bold leading-snug"> {fact} </div> <div className="mt-4 text-xs font-bold text-emerald-400 opacity-60 uppercase tracking-wide">Tap for new fact</div> </div> ); };
+        const Clock = () => { const [time, setTime] = useState(new Date()); useEffect(() => { const t = setInterval(() => setTime(new Date()), 1000); return () => clearInterval(t); }, []); return ( <div className="flex flex-col drop-shadow-md"> <h1 className="text-8xl font-bold tracking-tight text-slate-800 leading-none">{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).replace(/\s[AP]M/, '')}<span className="text-2xl text-slate-400 font-medium ml-1">{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).slice(-2)}</span></h1> <p className="text-3xl text-slate-500 font-light mt-1">{time.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}</p> </div> ); };
+        const Weather = ({ lat, lon }) => { const [data, setData] = useState(null); useEffect(() => { const f = async () => { try { const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&timezone=auto`); const d = await r.json(); setData(d); } catch (e) {} }; f(); const t = setInterval(f, 600000); return () => clearInterval(t); }, [lat, lon]); if (!data) return <div className="text-slate-300">Loading...</div>; const getIconUrl = (c) => { if (c === 0) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/clear-day.svg"; if (c === 1) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/partly-cloudy-day.svg"; if (c === 2) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/partly-cloudy-day.svg"; if (c === 3) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/overcast.svg"; if (c >= 45 && c <= 48) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/fog.svg"; if (c >= 51 && c <= 67) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/rain.svg"; if (c >= 71 && c <= 77) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/snow.svg"; if (c >= 80 && c <= 82) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/rain.svg"; if (c >= 85 && c <= 86) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/snow.svg"; if (c >= 95) return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/thunderstorms.svg"; return "https://raw.githubusercontent.com/basmilius/weather-icons/dev/design/fill/final/clear-day.svg"; }; const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; const today = new Date().getDay(); const day1 = (today + 1) % 7; const day2 = (today + 2) % 7; return ( <div className="flex items-center gap-6 bg-gradient-to-br from-sky-400 to-blue-500 px-6 py-4 rounded-3xl shadow-lg border border-white/10 text-white"> <div className="flex items-center gap-4"> <div className="text-right"> <div className="text-5xl font-bold text-white drop-shadow-md">{Math.round(data.current_weather.temperature)}°</div> <div className="text-xs font-bold uppercase tracking-wider opacity-80">Now</div> </div> <img src={getIconUrl(data.current_weather.weathercode)} className="w-16 h-16 drop-shadow-md" alt="weather" /> </div> <div className="w-px h-16 bg-white/30"></div> <div className="flex gap-4"> <div className="flex flex-col items-center"> <div className="text-xs font-bold text-slate-400 uppercase mb-1">{days[day1]}</div> <img src={getIconUrl(data.daily.weathercode[1])} className="w-8 h-8 drop-shadow-sm" alt="forecast" /> <div className="text-sm font-bold text-slate-700 mt-1">{Math.round(data.daily.temperature_2m_max[1])}°</div> </div> <div className="flex flex-col items-center"> <div className="text-xs font-bold text-slate-400 uppercase mb-1">{days[day2]}</div> <img src={getIconUrl(data.daily.weathercode[2])} className="w-8 h-8 drop-shadow-sm" alt="forecast" /> <div className="text-sm font-bold text-slate-700 mt-1">{Math.round(data.daily.temperature_2m_max[2])}°</div> </div> </div> </div> ); };
+        const Traffic = ({ apiKey, routes }) => { const [durations, setDurations] = useState({}); useEffect(() => { if (!apiKey || !routes) return; const getRoute = () => { if (!window.google || !window.google.maps) return; routes.forEach((route, index) => { const ds = new window.google.maps.DirectionsService(); ds.route({ origin: route.origin, destination: route.destination, travelMode: 'DRIVING', drivingOptions: { departureTime: new Date() } }, (res, stat) => { if(stat === 'OK') { const time = res.routes[0].legs[0].duration_in_traffic ? res.routes[0].legs[0].duration_in_traffic.text : res.routes[0].legs[0].duration.text; setDurations(prev => ({...prev, [index]: time})); } }); }); }; if (!window.google) { const s = document.createElement("script"); s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`; s.async = true; s.onload = getRoute; document.body.appendChild(s); } else { getRoute(); } const t = setInterval(getRoute, 900000); return () => clearInterval(t); }, [apiKey, routes]); return ( <div className="card h-full p-6 flex flex-col justify-center bg-white gap-4 relative"> <div className="flex items-center gap-2 border-b border-slate-50 pb-2"><div className="bg-emerald-100 p-1.5 rounded-full"><Icons.Car /></div><span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Commute</span></div> <div className="space-y-4">{routes.map((route, i) => (<div key={i} className="flex justify-between items-end"><div><div className="text-3xl font-bold text-slate-800 leading-none tracking-tight">{durations[i] || '--'}</div><div className="text-xs text-slate-500 mt-1 font-bold uppercase">{route.label}</div></div><div className="text-[10px] text-slate-300 max-w-[80px] truncate text-right">{route.destination.split(',')[0]}</div></div>))}</div> </div> ); };
+        const Photos = ({ images, embedUrl }) => { const [idx, setIdx] = useState(0); useEffect(() => { if (!embedUrl) { const t = setInterval(() => setIdx(i => (i + 1) % images.length), 10000); return () => clearInterval(t); } }, [images, embedUrl]); if (embedUrl) return <div className="card w-full h-full relative border-0 shadow-lg bg-black"><iframe src={embedUrl} className="w-full h-full border-none" scrolling="no" /></div>; return <div className="card w-full h-full relative border-0 shadow-lg bg-slate-200"><img src={images[idx]} className="w-full h-full object-cover absolute inset-0 transition-opacity duration-1000" /></div>; };
+        const GroceryList = ({ url }) => ( <div className="card h-full flex flex-col fade-in border-0 shadow-lg relative overflow-hidden"> {!url ? <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-slate-50"><div className="bg-emerald-100 p-4 rounded-full mb-4"><Icons.Cart /></div><h3 className="font-bold text-xl text-slate-800 mb-2">Synced Grocery List</h3><p className="text-slate-500 text-sm mb-6">Use OurGroceries or Todoist URL in Settings.</p></div> : <iframe src={url} className="w-full h-full border-none" />} </div> );
+        const ToDoWidget = () => { const [todos, setTodos] = useState(() => JSON.parse(localStorage.getItem('parentTodos')) || [{ id: 1, text: 'Pay electric bill', done: false }]); const [newTodo, setNewTodo] = useState(""); useEffect(() => localStorage.setItem('parentTodos', JSON.stringify(todos)), [todos]); const addTodo = (e) => { e.preventDefault(); if (!newTodo.trim()) return; setTodos([...todos, { id: Date.now(), text: newTodo, done: false }]); setNewTodo(""); }; return ( <div className="card h-full flex flex-col fade-in border-0 shadow-lg"> <div className="card-header bg-white pt-6 pb-4 border-b-0"><div className="flex items-center justify-between mb-4"><h3 className="font-bold text-2xl text-slate-800">To-Dos</h3></div><form onSubmit={addTodo} className="flex gap-2"><input className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 outline-none" placeholder="Add task..." value={newTodo} onChange={(e) => setNewTodo(e.target.value)} /><button type="submit" className="bg-blue-600 text-white px-5 py-2 rounded-xl font-bold">Add</button></form></div> <div className="p-6 space-y-3 overflow-y-auto flex-1 bg-slate-50/50">{todos.map(todo => (<div key={todo.id} className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><div onClick={() => setTodos(todos.map(t => t.id === todo.id ? { ...t, done: !t.done } : t))} className="flex items-center gap-3 flex-1 cursor-pointer"><div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${todo.done ? 'bg-green-500 border-green-500' : 'border-slate-300'}`}>{todo.done && <span className="text-white text-xs">✓</span>}</div><span className={todo.done ? 'text-slate-400 line-through' : 'text-slate-700'}>{todo.text}</span></div><button onClick={() => setTodos(todos.filter(t => t.id !== todo.id))} className="text-slate-300 hover:text-red-400">✕</button></div>))}</div> </div> ); };
+        const CalendarView = ({ memberUrl, defaultUrl }) => { const url = memberUrl || defaultUrl; const src = url.match(/src="([^"]+)"/)?.[1] || ""; return ( <div className="card h-full flex flex-col fade-in border-0 shadow-lg"> <div className="card-header bg-white py-4"><h3 className="font-bold text-xl text-slate-800 flex items-center gap-2"><Icons.Calendar /> Schedule</h3></div> <div className="flex-1 calendar-wrapper bg-white">{src ? <iframe src={src} scrolling="no" /> : <div className="h-full flex items-center justify-center text-slate-400">No Calendar Linked</div>}</div> </div> ); };
+        const AppleMusicPlayer = ({ playlists }) => { const [activeUrl, setActiveUrl] = useState(playlists[0]?.url || ""); const getEmbedUrl = (url) => url ? url.replace("music.apple.com", "embed.music.apple.com") : ""; return ( <div className="card h-full flex flex-col p-6 bg-white border-2 border-pink-100 shadow-xl"> <h3 className="text-pink-400 font-kids text-3xl mb-4 flex items-center gap-3 font-bold"><Icons.Music /> DJ Station</h3> <div className="flex-1 music-container bg-pink-50 rounded-2xl overflow-hidden shadow-inner mb-6 relative"><iframe src={getEmbedUrl(activeUrl)} width="100%" height="100%" allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" className="absolute inset-0"></iframe></div> <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">{playlists.map((pl, i) => (<button key={i} onClick={() => setActiveUrl(pl.url)} className={`flex-1 min-w-[120px] py-4 px-4 rounded-xl font-kids text-lg font-bold shadow-md ${activeUrl === pl.url ? 'bg-pink-500 text-white ring-4 ring-pink-200' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}>{pl.name}</button>))}</div> </div> ); };
+        const JokeWidget = () => { const [joke, setJoke] = useState(null); const [showPunchline, setShowPunchline] = useState(false); const fetchJoke = async () => { setShowPunchline(false); try { const res = await fetch('https://official-joke-api.appspot.com/jokes/random'); const data = await res.json(); setJoke(data); } catch (e) { setJoke({ setup: "Why did the chicken cross?", punchline: "To get to the other side!" }); } }; useEffect(() => { fetchJoke(); }, []); return ( <div onClick={() => showPunchline ? fetchJoke() : setShowPunchline(true)} className="card p-8 h-full flex flex-col items-center justify-center text-center cursor-pointer relative bg-gradient-to-br from-indigo-50 to-purple-50 hover:shadow-xl transition border-2 border-purple-100 select-none"> <div className="absolute top-6 left-6 text-purple-400 text-sm font-bold uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full flex items-center gap-1"><Icons.Smile /> Joke of the Day</div> {joke ? (<div className="mt-8 flex flex-col items-center justify-center h-full w-full"><div className="font-kids text-4xl text-slate-800 mb-8 leading-snug font-bold max-w-md">{joke.setup}</div>{showPunchline ? <div className="font-kids text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600 animate-pop leading-tight drop-shadow-sm">{joke.punchline}<div className="text-sm font-sans font-medium text-slate-400 mt-6 opacity-60">(Tap for another)</div></div> : <button className="bg-purple-500 text-white px-8 py-3 rounded-full text-xl font-bold shadow-lg shadow-purple-200 hover:bg-purple-600 transition transform hover:-translate-y-1">Tap for Answer</button>}</div>) : <div className="animate-pulse text-2xl font-kids text-slate-300">Finding a good one...</div>} </div> ); };
+        const Countdown = ({ targetDate, title }) => { const [timeLeft, setTimeLeft] = useState(""); useEffect(() => { const calc = () => { const diff = new Date(targetDate).getTime() - new Date().getTime(); setTimeLeft(diff < 0 ? "Hooray!" : `${Math.floor(diff / (1000 * 60 * 60 * 24))} Days`); }; calc(); }, [targetDate]); return ( <div className="card px-8 flex flex-row items-center justify-between h-full bg-blue-50 border-2 border-blue-100 shadow-md"> <div className="flex items-center gap-4"><div className="bg-blue-200 p-2 rounded-lg text-blue-700"><Icons.Calendar /></div><div><div className="text-blue-400 uppercase tracking-widest text-xs font-bold">Countdown</div><div className="font-kids text-2xl text-blue-900 font-bold">{title}</div></div></div><div className="font-kids text-5xl font-extrabold text-blue-500">{timeLeft}</div> </div> ); };
 
         // --- SETTINGS ---
         const Settings = ({ isOpen, onClose, config, onSave }) => {
             const [temp, setTemp] = useState(config);
+            const [activeTab, setActiveTab] = useState('background'); // background, family, system
+
             if(!isOpen) return null;
-            const handleFamily = (idx, field, val) => { const fam = [...temp.family]; fam[idx][field] = val; setTemp({...temp, family: fam}); };
-            const handlePlaylist = (idx, field, val) => { const pl = [...temp.playlists]; pl[idx][field] = val; setTemp({...temp, playlists: pl}); };
-            const handleKennedySchedule = (dayIdx, iconName) => {
-                const sched = [...temp.kennedySchedule];
-                const currentIcons = Array.isArray(sched[dayIdx].icon) ? sched[dayIdx].icon : [sched[dayIdx].icon];
-                sched[dayIdx].icon = currentIcons.includes(iconName) ? currentIcons.filter(i => i !== iconName) : [...currentIcons, iconName];
-                setTemp({...temp, kennedySchedule: sched});
-            };
-            const handleThemeChange = (newTheme) => setTemp({...temp, theme: newTheme});
-
-            // New: Handle task changes
-            const handleTaskChange = (famIdx, taskIdx, field, val) => {
-                const fam = [...temp.family];
-                fam[famIdx].tasks[taskIdx][field] = field === 'p' ? parseInt(val) : val;
-                setTemp({...temp, family: fam});
-            };
-
-            const handleAddTask = (famIdx) => {
-                const fam = [...temp.family];
-                fam[famIdx].tasks.push({ id: Date.now(), t: 'New Task', p: 5 });
-                setTemp({...temp, family: fam});
-            };
-
-            const handleDeleteTask = (famIdx, taskIdx) => {
-                const fam = [...temp.family];
-                fam[famIdx].tasks.splice(taskIdx, 1);
-                setTemp({...temp, family: fam});
-            };
             
-            // UPDATED: Use file paths for settings options too
-            const iconOptions = [
-                './images/home.png',
-                './images/school-bus.png',
-                './images/y.png',
-                './images/ice skate.png',
-                './images/park.png',
-                './images/playdate.png'
-            ];
+            const handleFamily = (idx, field, val) => { const fam = [...temp.family]; fam[idx][field] = val; setTemp({...temp, family: fam}); };
+            const handleKennedySchedule = (dayIdx, iconName) => { const sched = [...temp.kennedySchedule]; const currentIcons = Array.isArray(sched[dayIdx].icon) ? sched[dayIdx].icon : [sched[dayIdx].icon]; sched[dayIdx].icon = currentIcons.includes(iconName) ? currentIcons.filter(i => i !== iconName) : [...currentIcons, iconName]; setTemp({...temp, kennedySchedule: sched}); };
+            const handleTaskChange = (famIdx, taskIdx, field, val) => { const fam = [...temp.family]; fam[famIdx].tasks[taskIdx][field] = field === 'p' ? parseInt(val) : val; setTemp({...temp, family: fam}); };
+            const handleAddTask = (famIdx) => { const fam = [...temp.family]; fam[famIdx].tasks.push({ id: Date.now(), t: 'New Task', p: 5 }); setTemp({...temp, family: fam}); };
+            const handleDeleteTask = (famIdx, taskIdx) => { const fam = [...temp.family]; fam[famIdx].tasks.splice(taskIdx, 1); setTemp({...temp, family: fam}); };
+            const handleToggleDaily = (famIdx, taskIdx) => { const fam = [...temp.family]; fam[famIdx].tasks[taskIdx].isDaily = !fam[famIdx].tasks[taskIdx].isDaily; setTemp({...temp, family: fam}); };
+            
+            // New Spin Wheel Handlers
+            const handlePrizeChange = (idx, field, val) => {
+                const prizes = [...temp.spinWheelPrizes];
+                if (field === 'value') val = parseInt(val) || 0;
+                // If toggling sticker type
+                if (field === 'isSticker') {
+                    prizes[idx].type = val ? 'sticker' : 'points';
+                    prizes[idx].value = val ? 0 : 10; // Default points if switching back
+                } else {
+                    prizes[idx][field] = val;
+                }
+                setTemp({...temp, spinWheelPrizes: prizes});
+            };
 
+            const iconOptions = [ './images/home.png', './images/school-bus.png', './images/y.png', './images/ice skate.png', './images/park.png', './images/playdate.png' ];
+            
             return (
                 <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
-                    <div className="bg-white w-[700px] max-h-[85vh] rounded-2xl shadow-2xl flex flex-col">
-                        <div className="p-6 border-b border-slate-100 flex justify-between"><h2 className="text-2xl font-bold">Settings</h2><button onClick={onClose}>✕</button></div>
-                        <div className="flex-1 overflow-y-auto p-6 space-y-8 text-slate-800">
-                             
-                             <section><h3 className="text-slate-400 uppercase text-xs font-bold mb-4">Background Theme</h3><div className="grid grid-cols-3 gap-2">{Object.keys(THEMES).map(t => (<button key={t} onClick={() => handleThemeChange(t)} className={`p-3 rounded-lg text-sm font-bold border-2 transition ${temp.theme === t ? 'border-slate-800 text-slate-800 bg-slate-100' : 'border-slate-100 text-slate-400'}`}>{t}</button>))}</div>
-                             <div className="mt-4"><input className="w-full bg-slate-50 p-3 rounded border border-slate-200 text-xs" placeholder="Custom Background Image URL (overrides theme)" value={temp.customBackground || ''} onChange={e => setTemp({...temp, customBackground: e.target.value})} /></div>
-                             </section>
-
-                             <section><h3 className="text-slate-400 uppercase text-xs font-bold mb-4">Kennedy's Calendar</h3><div className="space-y-4">{temp.kennedySchedule.map((day, i) => (<div key={i} className="bg-slate-50 p-3 rounded-xl border border-slate-200"><div className="font-bold text-sm mb-2">{day.day}</div><div className="flex flex-wrap gap-2">{iconOptions.map(opt => <button key={opt} onClick={() => handleKennedySchedule(i, opt)} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${(Array.isArray(day.icon) ? day.icon : [day.icon]).includes(opt) ? 'bg-blue-500 text-white shadow-md' : 'bg-white text-slate-500 border border-slate-200'}`}>{opt.includes('.') ? <img src={opt} className="w-6 h-6 object-contain" /> : opt}</button>)}</div></div>))}</div></section>
-                             <section>
-                                <h3 className="text-slate-400 uppercase text-xs font-bold mb-4">Family & Rewards</h3>
-                                {temp.family.map((mem, i) => (
-                                    <div key={i} className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4">
-                                        <div className="flex gap-4 mb-3">
-                                            <input className="bg-white p-2 rounded w-1/3 border border-slate-200 font-bold" value={mem.name} onChange={e => handleFamily(i, 'name', e.target.value)} />
-                                            {mem.type === 'kid' ? <><input className="bg-white p-2 rounded flex-1 border border-slate-200 text-sm" placeholder="Reward Goal" value={mem.goalName || ''} onChange={e => handleFamily(i, 'goalName', e.target.value)} /><input className="bg-white p-2 rounded w-20 border border-slate-200 text-sm" type="number" placeholder="Target" value={mem.goalTarget || ''} onChange={e => handleFamily(i, 'goalTarget', e.target.value)} /></> : <div className="flex-1 text-xs text-slate-400 flex items-center px-2 italic">Parent Mode</div>}
-                                        </div>
-                                        <input className="w-full bg-white p-2 rounded text-xs font-mono border border-slate-200 text-slate-500 mb-3" placeholder="Calendar Embed Code" value={mem.calendarUrl || ''} onChange={e => handleFamily(i, 'calendarUrl', e.target.value)} />
-                                        
-                                        {/* NEW: Task Editing */}
-                                        {mem.type === 'kid' && (
-                                            <div className="mt-2 pl-4 border-l-2 border-slate-200">
-                                                <div className="text-xs font-bold text-slate-400 uppercase mb-2">Tasks & Points</div>
-                                                {mem.tasks && mem.tasks.map((task, tIdx) => (
-                                                     <div key={tIdx} className="flex gap-2 mb-2">
-                                                         <input className="bg-white p-2 rounded flex-1 border border-slate-200 text-sm" value={task.t} onChange={(e) => handleTaskChange(i, tIdx, 't', e.target.value)} />
-                                                         <input type="number" className="bg-white p-2 rounded w-16 border border-slate-200 text-sm text-center" value={task.p} onChange={(e) => handleTaskChange(i, tIdx, 'p', e.target.value)} />
-                                                         <button onClick={() => handleDeleteTask(i, tIdx)} className="text-red-400 hover:text-red-600 font-bold px-2">✕</button>
-                                                     </div>
-                                                ))}
-                                                <button onClick={() => handleAddTask(i)} className="text-xs font-bold text-blue-500 hover:text-blue-700 mt-1">+ Add Task</button>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                             </section>
-                             <section><h3 className="text-slate-400 uppercase text-xs font-bold mb-4">System</h3><div className="space-y-4"><input className="w-full bg-slate-50 p-3 rounded border border-slate-200 text-xs" placeholder="Traffic API Key" value={temp.traffic.apiKey} onChange={e => setTemp({...temp, traffic: {...temp.traffic, apiKey: e.target.value}})} /><input className="w-full bg-slate-50 p-3 rounded border border-slate-200" placeholder="Grocery List URL" value={temp.groceryUrl || ''} onChange={e => setTemp({...temp, groceryUrl: e.target.value})} /></div></section>
+                    <div className="bg-white w-[800px] h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+                        
+                        {/* Header */}
+                        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h2 className="text-2xl font-bold text-slate-800">Settings</h2>
+                            <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
                         </div>
-                        <div className="p-6 border-t border-slate-100 flex justify-end gap-3"><button onClick={onClose} className="px-6 py-2 text-slate-400">Cancel</button><button onClick={() => onSave(temp)} className="px-6 py-2 bg-slate-800 text-white rounded-lg font-bold">Save</button></div>
+
+                        {/* Tabs */}
+                        <div className="flex border-b border-slate-200 px-6 pt-4 gap-2 bg-slate-50">
+                            <button onClick={() => setActiveTab('background')} className={`tab-btn ${activeTab === 'background' ? 'active' : ''}`}>Background</button>
+                            <button onClick={() => setActiveTab('family')} className={`tab-btn ${activeTab === 'family' ? 'active' : ''}`}>Family & Rewards</button>
+                            <button onClick={() => setActiveTab('system')} className={`tab-btn ${activeTab === 'system' ? 'active' : ''}`}>System</button>
+                        </div>
+
+                        {/* Content Area */}
+                        <div className="flex-1 overflow-y-auto p-8 space-y-8 bg-white text-slate-800">
+                             
+                             {/* TAB: BACKGROUND */}
+                             {activeTab === 'background' && (
+                                <section>
+                                    <div className="mb-4">
+                                        <h3 className="text-lg font-bold text-slate-700 mb-1">Custom Wallpaper</h3>
+                                        <p className="text-sm text-slate-400">Paste a URL to an image to replace the default background.</p>
+                                    </div>
+                                    <input 
+                                        className="w-full bg-slate-50 p-4 rounded-xl border-2 border-slate-200 focus:border-slate-800 outline-none transition-colors" 
+                                        placeholder="https://example.com/my-wallpaper.jpg" 
+                                        value={temp.customBackground || ''} 
+                                        onChange={e => setTemp({...temp, customBackground: e.target.value})} 
+                                    />
+                                    {temp.customBackground && (
+                                        <div className="mt-4 h-48 w-full rounded-xl bg-cover bg-center border-2 border-slate-100" style={{backgroundImage: `url(${temp.customBackground})`}}></div>
+                                    )}
+                                </section>
+                             )}
+
+                             {/* TAB: FAMILY & REWARDS */}
+                             {activeTab === 'family' && (
+                                 <div className="space-y-8">
+                                     {/* Section: Family Members */}
+                                     <section>
+                                        <h3 className="text-slate-400 uppercase text-xs font-bold mb-4 tracking-wider">Family Members & Chores</h3>
+                                        {temp.family.map((mem, i) => (
+                                            <div key={i} className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4">
+                                                <div className="flex gap-4 mb-3"><input className="bg-white p-2 rounded w-1/3 border border-slate-200 font-bold" value={mem.name} onChange={e => handleFamily(i, 'name', e.target.value)} />{mem.type === 'kid' ? <><input className="bg-white p-2 rounded flex-1 border border-slate-200 text-sm" placeholder="Reward Goal" value={mem.goalName || ''} onChange={e => handleFamily(i, 'goalName', e.target.value)} /><input className="bg-white p-2 rounded w-20 border border-slate-200 text-sm" type="number" placeholder="Target" value={mem.goalTarget || ''} onChange={e => handleFamily(i, 'goalTarget', e.target.value)} /></> : <div className="flex-1 text-xs text-slate-400 flex items-center px-2 italic">Parent Mode</div>}</div>
+                                                <input className="w-full bg-white p-2 rounded text-xs font-mono border border-slate-200 text-slate-500 mb-3" placeholder="Calendar Embed Code" value={mem.calendarUrl || ''} onChange={e => handleFamily(i, 'calendarUrl', e.target.value)} />
+                                                {mem.type === 'kid' && (
+                                                    <div className="mt-2 pl-4 border-l-2 border-slate-200">
+                                                        <div className="text-xs font-bold text-slate-400 uppercase mb-2">Tasks & Points</div>
+                                                        {mem.tasks && mem.tasks.map((task, tIdx) => (
+                                                             <div key={tIdx} className="flex gap-2 mb-2 items-center">
+                                                                 <input className="bg-white p-2 rounded flex-1 border border-slate-200 text-sm" value={task.t} onChange={(e) => handleTaskChange(i, tIdx, 't', e.target.value)} />
+                                                                 <input type="number" className="bg-white p-2 rounded w-16 border border-slate-200 text-sm text-center" value={task.p} onChange={(e) => handleTaskChange(i, tIdx, 'p', e.target.value)} />
+                                                                 <button onClick={() => handleToggleDaily(i, tIdx)} className={`px-2 py-1 rounded text-xs font-bold ${task.isDaily ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-400'}`}>{task.isDaily ? 'Daily' : 'Once'}</button>
+                                                                 <button onClick={() => handleDeleteTask(i, tIdx)} className="text-red-400 hover:text-red-600 font-bold px-2">✕</button>
+                                                             </div>
+                                                        ))}
+                                                        <button onClick={() => handleAddTask(i)} className="text-xs font-bold text-blue-500 hover:text-blue-700 mt-1">+ Add Task</button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                     </section>
+
+                                     {/* Section: Spin Wheel */}
+                                     <section className="pt-4 border-t border-slate-100">
+                                        <h3 className="text-slate-400 uppercase text-xs font-bold mb-4 tracking-wider">Spin Wheel Prizes</h3>
+                                        <div className="space-y-3">
+                                            {temp.spinWheelPrizes.map((prize, i) => (
+                                                <div key={i} className="flex gap-3 items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                                    <div className="w-6 h-6 rounded-full flex-shrink-0" style={{backgroundColor: prize.color}}></div>
+                                                    <input className="flex-1 bg-white p-2 rounded border border-slate-200 text-sm font-bold" value={prize.label} onChange={(e) => handlePrizeChange(i, 'label', e.target.value)} placeholder="Label" />
+                                                    {prize.type !== 'sticker' ? (
+                                                        <input type="number" className="w-20 bg-white p-2 rounded border border-slate-200 text-sm text-center" value={prize.value} onChange={(e) => handlePrizeChange(i, 'value', e.target.value)} placeholder="Points" />
+                                                    ) : (
+                                                        <div className="w-20 text-center text-xs font-bold text-slate-400 uppercase bg-slate-100 py-2 rounded">Sticker</div>
+                                                    )}
+                                                    <label className="flex items-center gap-2 text-xs font-bold text-slate-500 cursor-pointer select-none">
+                                                        <input type="checkbox" checked={prize.type === 'sticker'} onChange={(e) => handlePrizeChange(i, 'isSticker', e.target.checked)} />
+                                                        Is Sticker?
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                     </section>
+
+                                     {/* Section: Kennedy Schedule */}
+                                     <section className="pt-4 border-t border-slate-100">
+                                         <h3 className="text-slate-400 uppercase text-xs font-bold mb-4 tracking-wider">Kennedy's Visual Schedule</h3>
+                                         <div className="space-y-4">{temp.kennedySchedule.map((day, i) => (<div key={i} className="bg-slate-50 p-3 rounded-xl border border-slate-200"><div className="font-bold text-sm mb-2">{day.day}</div><div className="flex flex-wrap gap-2">{iconOptions.map(opt => <button key={opt} onClick={() => handleKennedySchedule(i, opt)} className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${(Array.isArray(day.icon) ? day.icon : [day.icon]).includes(opt) ? 'bg-blue-500 text-white shadow-md' : 'bg-white text-slate-500 border border-slate-200'}`}>{opt.includes('.') ? <img src={opt} className="w-6 h-6 object-contain" /> : opt}</button>)}</div></div>))}</div>
+                                     </section>
+                                 </div>
+                             )}
+
+                             {/* TAB: SYSTEM */}
+                             {activeTab === 'system' && (
+                                <section>
+                                    <h3 className="text-slate-400 uppercase text-xs font-bold mb-4 tracking-wider">System Config</h3>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-500 mb-1">Traffic API Key (Google Maps)</label>
+                                            <input className="w-full bg-slate-50 p-3 rounded border border-slate-200 text-xs font-mono" placeholder="API Key" value={temp.traffic.apiKey} onChange={e => setTemp({...temp, traffic: {...temp.traffic, apiKey: e.target.value}})} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-500 mb-1">Grocery List URL</label>
+                                            <input className="w-full bg-slate-50 p-3 rounded border border-slate-200" placeholder="https://..." value={temp.groceryUrl || ''} onChange={e => setTemp({...temp, groceryUrl: e.target.value})} />
+                                        </div>
+                                    </div>
+                                </section>
+                             )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-6 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+                            <button onClick={onClose} className="px-6 py-2 text-slate-400 font-bold hover:text-slate-600 transition">Cancel</button>
+                            <button onClick={() => onSave(temp)} className="px-8 py-2 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition shadow-lg">Save Changes</button>
+                        </div>
                     </div>
                 </div>
             );
@@ -735,42 +684,37 @@
             const [page, setPage] = useState(0); 
             const [selectedMemberIdx, setSelectedMemberIdx] = useState(null); 
             const [showSettings, setShowSettings] = useState(false);
-            const [showStickerDrawer, setShowStickerDrawer] = useState(false);
             const [quickNote, setQuickNote] = useState(() => localStorage.getItem('dashQuickNote') || "Don't forget milk!");
             
-            // Sticker State
-            const [stickers, setStickers] = useState(() => {
-                const s = localStorage.getItem('dashStickers');
-                return s ? JSON.parse(s) : [];
-            });
-
             const touchStart = useRef(null);
             
             const [config, setConfig] = useState(() => {
-                // UPDATED TO V27 TO FORCE RELOAD OF NEW DEFAULTS
-                try { const s = localStorage.getItem('dashConfigV27'); return s ? JSON.parse(s) : DEFAULT_CONFIG; } catch(e) { return DEFAULT_CONFIG; }
+                // Versioning to force new schema update (V35 for Kennedy's new stickers)
+                try { const s = localStorage.getItem('dashConfigV35'); return s ? JSON.parse(s) : DEFAULT_CONFIG; } catch(e) { return DEFAULT_CONFIG; }
             });
 
-            useEffect(() => localStorage.setItem('dashStickers', JSON.stringify(stickers)), [stickers]);
-
-            const addSticker = (sticker) => {
-                const newSticker = {
-                    id: Date.now(),
-                    ...sticker,
-                    x: window.innerWidth / 2,
-                    y: window.innerHeight / 2
-                };
-                setStickers([...stickers, newSticker]);
-                setShowStickerDrawer(false);
-            };
-
-            const updateSticker = (id, x, y) => {
-                setStickers(stickers.map(s => s.id === id ? { ...s, x, y } : s));
-            };
-
-            const removeSticker = (id) => {
-                setStickers(stickers.filter(s => s.id !== id));
-            };
+            useEffect(() => {
+                // Daily Reset Check for all family members
+                const today = new Date().toDateString();
+                const newFam = config.family.map(mem => {
+                    if (mem.type !== 'kid' || !mem.tasks) return mem;
+                    let changed = false;
+                    const newTasks = mem.tasks.map(t => {
+                        if (t.isDaily && t.isCompleted && t.lastCompleted) {
+                            const lastDate = new Date(t.lastCompleted).toDateString();
+                            if (lastDate !== today) {
+                                changed = true;
+                                return { ...t, isCompleted: false };
+                            }
+                        }
+                        return t;
+                    });
+                    return changed ? { ...mem, tasks: newTasks } : mem;
+                });
+                if (JSON.stringify(newFam) !== JSON.stringify(config.family)) {
+                     // Auto-save logic if needed, skipped for simplicity to prevent loops
+                }
+            }, []);
 
             const onTouchEnd = (e) => {
                 if (!touchStart.current) return;
@@ -780,37 +724,23 @@
                 touchStart.current = null;
             };
 
-            const handleScore = (memId, delta) => {
-                const newFam = config.family.map(m => m.id === memId ? { ...m, score: m.score + delta } : m);
+            const handleMemberUpdate = (updatedMember) => {
+                const newFam = config.family.map(m => m.id === updatedMember.id ? updatedMember : m);
                 const newConfig = { ...config, family: newFam };
-                setConfig(newConfig);
-                localStorage.setItem('dashConfigV27', JSON.stringify(newConfig));
-            };
-
-            const handleResetScore = (memId) => {
-                const newFam = config.family.map(m => m.id === memId ? { ...m, score: 0 } : m);
-                const newConfig = { ...config, family: newFam };
-                setConfig(newConfig);
-                localStorage.setItem('dashConfigV27', JSON.stringify(newConfig));
+                saveConfig(newConfig);
             };
 
             const saveConfig = (newConf) => {
                 setConfig(newConf);
-                localStorage.setItem('dashConfigV27', JSON.stringify(newConf));
+                localStorage.setItem('dashConfigV35', JSON.stringify(newConf));
                 setShowSettings(false);
             }
 
             const toggleFullScreen = () => { 
                 if (!document.fullscreenElement) { 
-                    // Add catch to handle permission errors in iframes
-                    document.documentElement.requestFullscreen().catch(err => {
-                        console.log("Fullscreen disallowed:", err);
-                        // Fallback or silent fail
-                    }); 
+                    document.documentElement.requestFullscreen().catch(err => console.log("Fullscreen disallowed:", err)); 
                 } else { 
-                    if (document.exitFullscreen) { 
-                        document.exitFullscreen().catch(err => console.log(err)); 
-                    } 
+                    if (document.exitFullscreen) document.exitFullscreen().catch(err => console.log(err)); 
                 } 
             };
 
@@ -821,39 +751,43 @@
                     onTouchStart={e => touchStart.current = e.touches[0].clientX} 
                     onTouchEnd={onTouchEnd}
                 >
-                    {/* Sticker Layer */}
-                    <StickerLayer stickers={stickers} onUpdate={updateSticker} onRemove={removeSticker} />
-
-                    {/* UPDATED HEADER: Gradient background for readability if overlap occurs */}
+                    {/* Header */}
                     <div className="absolute top-0 left-0 w-full p-8 flex justify-between items-start pointer-events-none z-40 bg-gradient-to-b from-white/80 to-transparent pb-16"><Clock /><Weather lat={config.weather.lat} lon={config.weather.lon} /></div>
                     
-                    {/* Controls moved to bottom right */}
+                    {/* Controls */}
                     <div className="absolute bottom-6 right-6 flex gap-4 z-50">
-                        <button onClick={() => setShowStickerDrawer(!showStickerDrawer)} className="p-3 bg-yellow-400 text-yellow-900 rounded-full hover:bg-yellow-300 transition shadow-lg hover:scale-110 active:scale-95"><Icons.Star /></button>
                         <button onClick={toggleFullScreen} className="p-3 bg-white rounded-full text-slate-400 hover:text-slate-800 transition shadow-lg"><Icons.Maximize /></button>
                         <button onClick={() => setShowSettings(true)} className="p-3 bg-white rounded-full text-slate-400 hover:text-slate-800 transition shadow-lg"><Icons.Settings /></button>
                     </div>
 
                     <div className="flex h-full w-[500vw] page-container" style={{ transform: `translateX(-${page * 20}%)` }}>
                         
-                        {/* PAGE 1: GLANCE (UPDATED PADDING PT-48) */}
+                        {/* PAGE 1: GLANCE */}
                         <div className="w-screen h-full p-8 pt-48 grid grid-cols-12 grid-rows-6 gap-6">
                             <div className="col-span-8 row-span-6 rounded-3xl overflow-hidden shadow-xl border-4 border-white"><Photos images={config.photos} embedUrl={config.photoEmbedUrl} /></div>
                             <div className="col-span-4 row-span-2"><Traffic apiKey={config.traffic.apiKey} routes={config.traffic.routes} /></div>
                             <div className="col-span-4 row-span-4"><div className="card h-full p-6 flex flex-col"><div className="text-slate-400 text-xs font-bold uppercase mb-4 tracking-wider">Up Next</div><div className="flex-1 -mx-4 mb-4 relative">{config.calendar.embedCode ? <iframe src={config.calendar.embedCode.match(/src="([^"]+)"/)?.[1] + "&mode=AGENDA&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23ffffff"} className="w-full h-full border-none" scrolling="no" /> : <div className="p-4 text-slate-400">No Calendar</div>}</div><div className="mt-auto pt-4 border-t border-slate-100"><div className="text-xs text-slate-400 mb-2 font-bold uppercase">Quick Note</div><input className="font-hand text-2xl text-slate-600 bg-transparent w-full border-none focus:outline-none placeholder-slate-300" value={quickNote} onChange={(e) => { setQuickNote(e.target.value); localStorage.setItem('dashQuickNote', e.target.value); }} placeholder="Type note here..." /></div></div></div>
                         </div>
 
-                        {/* PAGE 2: HUB (UPDATED PADDING PT-48) */}
+                        {/* PAGE 2: HUB */}
                         <div className="w-screen h-full p-8 pt-48 grid grid-cols-12 grid-rows-12 gap-6">
                             <div className="col-span-12 row-span-1 flex gap-4 overflow-x-auto pb-2 no-scrollbar"><button onClick={() => setSelectedMemberIdx(null)} className={`px-8 py-3 rounded-full font-bold text-lg transition shadow-sm ${selectedMemberIdx === null ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border border-slate-200'}`}>Family Overview</button>{config.family.map((mem, i) => ( <button key={i} onClick={() => setSelectedMemberIdx(i)} className={`px-6 py-3 rounded-full font-bold text-lg transition shadow-sm flex items-center gap-2 ${selectedMemberIdx === i ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border border-slate-200'}`}><div className={`w-3 h-3 rounded-full ${mem.color.split(' ')[0]}`}></div>{mem.name}</button> ))}</div>
                             <div className="col-span-7 row-span-11"><CalendarView memberUrl={selectedMemberIdx !== null ? config.family[selectedMemberIdx].calendarUrl : null} defaultUrl={config.calendar.embedCode} /></div>
-                            <div className="col-span-5 row-span-11">{selectedMemberIdx !== null ? (config.family[selectedMemberIdx].type === 'parent' ? <ToDoWidget /> : <TaskList member={config.family[selectedMemberIdx]} onUpdateScore={handleScore} onResetScore={handleResetScore} />) : (<div className="card h-full p-6 flex flex-col border-0 shadow-lg"><div className="card-header bg-white border-none p-0 mb-6"><h3 className="font-bold text-2xl text-slate-800">Weekly Progress</h3></div><div className="flex-1 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-4 content-start">{config.family.filter(m => m.type === 'kid').map(mem => {const radius = 50;const circumference = 2 * Math.PI * radius;const percent = Math.min(100, Math.max(0, (mem.score / (mem.goalTarget || 100)) * 100));const offset = circumference - (percent / 100) * circumference;return (<div key={mem.id} className={`p-6 rounded-3xl border-2 border-white shadow-sm flex flex-col items-center justify-center ${mem.color}`}><div className="relative w-32 h-32"><svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120"><circle cx="60" cy="60" r={radius} stroke="currentColor" strokeWidth="10" fill="none" className="opacity-20" /><circle cx="60" cy="60" r={radius} stroke="currentColor" strokeWidth="10" fill="none" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" className="transition-all duration-1000 ease-out" /></svg><div className="absolute inset-0 flex flex-col items-center justify-center"><span className="text-3xl font-bold">{Math.round(percent)}%</span></div></div><div className="mt-4 text-center"><div className="font-bold text-2xl">{mem.name}</div><div className="text-sm font-bold opacity-70">{mem.score} / {mem.goalTarget} Points</div></div></div>);})}</div></div>)}</div>
+                            <div className="col-span-5 row-span-11">
+                                {selectedMemberIdx !== null ? (
+                                    config.family[selectedMemberIdx].type === 'parent' 
+                                        ? <ToDoWidget /> 
+                                        : <KidMode member={config.family[selectedMemberIdx]} onUpdate={handleMemberUpdate} prizes={config.spinWheelPrizes} />
+                                ) : (
+                                    <div className="card h-full p-6 flex flex-col border-0 shadow-lg"><div className="card-header bg-white border-none p-0 mb-6"><h3 className="font-bold text-2xl text-slate-800">Weekly Progress</h3></div><div className="flex-1 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-4 content-start">{config.family.filter(m => m.type === 'kid').map(mem => {const radius = 50;const circumference = 2 * Math.PI * radius;const percent = Math.min(100, Math.max(0, (mem.score / (mem.goalTarget || 100)) * 100));const offset = circumference - (percent / 100) * circumference;return (<div key={mem.id} className={`p-6 rounded-3xl border-2 border-white shadow-sm flex flex-col items-center justify-center ${mem.color}`}><div className="relative w-32 h-32"><svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120"><circle cx="60" cy="60" r={radius} stroke="currentColor" strokeWidth="10" fill="none" className="opacity-20" /><circle cx="60" cy="60" r={radius} stroke="currentColor" strokeWidth="10" fill="none" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" className="transition-all duration-1000 ease-out" /></svg><div className="absolute inset-0 flex flex-col items-center justify-center"><span className="text-3xl font-bold">{Math.round(percent)}%</span></div></div><div className="mt-4 text-center"><div className="font-bold text-2xl">{mem.name}</div><div className="text-sm font-bold opacity-70">{mem.score} / {mem.goalTarget} Points</div></div></div>);})}</div></div>
+                                )}
+                            </div>
                         </div>
 
-                        {/* PAGE 3: KENNEDY'S CALENDAR (UPDATED PADDING PT-48) */}
+                        {/* PAGE 3: KENNEDY'S CALENDAR */}
                         <div className="w-screen h-full p-8 pt-48 grid grid-cols-12 gap-6"><div className="col-span-12 h-full"><KennedyCalendar schedule={config.kennedySchedule} /></div></div>
 
-                        {/* PAGE 4: KIDS ZONE (UPDATED PADDING PT-48) */}
+                        {/* PAGE 4: KIDS ZONE */}
                         <div className="w-screen h-full p-8 pt-48 grid grid-cols-12 grid-rows-12 gap-6"><div className="col-span-12 row-span-1"><h2 className="font-kids text-4xl text-slate-800 font-extrabold flex items-center gap-3"><span className="text-yellow-400">✨</span> Kids Zone</h2></div><div className="col-span-7 row-span-11 flex flex-col gap-6"><div className="flex-1"><AppleMusicPlayer playlists={config.playlists} /></div></div>
                         <div className="col-span-5 row-span-11 flex flex-col gap-6">
                             <div className="flex-1"><JokeWidget /></div>
@@ -862,13 +796,12 @@
                         </div>
                         </div>
 
-                        {/* PAGE 5: UTILITY (UPDATED PADDING PT-48) */}
+                        {/* PAGE 5: UTILITY */}
                         <div className="w-screen h-full p-8 pt-48 grid grid-cols-12 gap-6"><div className="col-span-8 h-full"><GroceryList url={config.groceryUrl} /></div><div className="col-span-4 h-full flex flex-col gap-6"><div className="flex-1"><TimerWidget /></div></div></div>
                         
                     </div>
                     <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-50 bg-white/80 px-6 py-3 rounded-full backdrop-blur-md border border-slate-200 shadow-lg">{[0, 1, 2, 3, 4].map(i => <button key={i} onClick={() => setPage(i)} className={`w-3 h-3 rounded-full transition-all ${page === i ? 'bg-slate-800 scale-125' : 'bg-slate-300'}`} />)}</div>
                     
-                    <StickerDrawer isOpen={showStickerDrawer} onClose={() => setShowStickerDrawer(false)} onAdd={addSticker} />
                     <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} config={config} onSave={saveConfig} />
                 </div>
             );
