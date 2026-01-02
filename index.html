@@ -819,28 +819,51 @@
             });
 
             useEffect(() => {
-                // Daily Reset Check for all family members
-                const today = new Date().toDateString();
-                const newFam = config.family.map(mem => {
-                    if (mem.type !== 'kid' || !mem.tasks) return mem;
-                    let changed = false;
-                    const newTasks = mem.tasks.map(t => {
-                        // Reset if it's a new day
-                        const lastDateStr = t.lastCompleted ? new Date(t.lastCompleted).toDateString() : null;
-                        if (lastDateStr !== today && (t.isCompleted || (t.completedCount > 0))) {
-                            changed = true;
-                            return { ...t, isCompleted: false, completedCount: 0 };
+                const checkDailyReset = () => {
+                    const today = new Date().toDateString();
+                    
+                    setConfig(currentConfig => {
+                        let hasChanges = false;
+                        const newFamily = currentConfig.family.map(mem => {
+                            if (mem.type !== 'kid' || !mem.tasks) return mem;
+                            
+                            let memChanged = false;
+                            const newTasks = mem.tasks.map(t => {
+                                const lastDateStr = t.lastCompleted ? new Date(t.lastCompleted).toDateString() : null;
+                                
+                                // If task has progress/completion and the last activity wasn't today, reset it
+                                if ((t.isCompleted || (t.completedCount > 0)) && lastDateStr && lastDateStr !== today) {
+                                    memChanged = true;
+                                    // Reset progress but keep the task definition
+                                    return { ...t, isCompleted: false, completedCount: 0 };
+                                }
+                                return t;
+                            });
+
+                            if (memChanged) {
+                                hasChanges = true;
+                                return { ...mem, tasks: newTasks };
+                            }
+                            return mem;
+                        });
+
+                        if (hasChanges) {
+                            const newConfig = { ...currentConfig, family: newFamily };
+                            localStorage.setItem('dashConfigV39', JSON.stringify(newConfig));
+                            return newConfig;
                         }
-                        return t;
+                        return currentConfig;
                     });
-                    return changed ? { ...mem, tasks: newTasks } : mem;
-                });
-                if (JSON.stringify(newFam) !== JSON.stringify(config.family)) {
-                     // In a real app we'd save state here, avoiding infinite loop by strict equality check above
-                     setConfig({...config, family: newFam});
-                     localStorage.setItem('dashConfigV39', JSON.stringify({...config, family: newFam}));
-                }
-            }, []); // Run once on mount
+                };
+
+                // Run check immediately on mount
+                checkDailyReset();
+
+                // Run check every minute to catch midnight transition
+                const interval = setInterval(checkDailyReset, 60000);
+
+                return () => clearInterval(interval);
+            }, []);
 
             const onTouchEnd = (e) => {
                 if (!touchStart.current) return;
