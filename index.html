@@ -288,6 +288,10 @@
             const boardRef = useRef(null);
             const isLincoln = member.name === 'Lincoln';
 
+            // Refs to prevent stale closure issues in async callbacks
+            const memberRef = useRef(member);
+            useEffect(() => { memberRef.current = member; }, [member]);
+
             // Available Stickers - Use member specific items or default
             const defaultShop = [
                 { id: 101, type: 'emoji', content: '🦁', price: 20, name: 'Lion' },
@@ -348,8 +352,10 @@
             };
 
             const handleSpinResult = (cost, prize) => {
-                let newScore = member.score - cost;
-                let newInv = getInventory();
+                // Use latest member state from ref to avoid stale closures
+                const currentMember = memberRef.current;
+                let newScore = currentMember.score - cost;
+                let newInv = currentMember.inventory || [];
                 
                 if (prize) {
                     if (prize.type === 'sticker') {
@@ -359,7 +365,7 @@
                         newScore += parseInt(prize.value);
                     }
                 }
-                onUpdate({ ...member, score: Math.max(0, newScore), inventory: newInv });
+                onUpdate({ ...currentMember, score: Math.max(0, newScore), inventory: newInv });
             };
 
             const placeSticker = (stickerId, x, y) => {
@@ -494,7 +500,7 @@
 
                         {view === 'spin' && (
                             <div className="h-full flex items-center justify-center">
-                                <SpinWheel onSpin={handleSpinResult} cost={20} points={member.score} prizes={prizes} />
+                                <SpinWheel onSpin={handleSpinResult} cost={10} points={member.score} prizes={prizes} />
                             </div>
                         )}
                     </div>
@@ -814,8 +820,8 @@
             const touchStart = useRef(null);
             
             const [config, setConfig] = useState(() => {
-                // Versioning to force new schema update (V39 for Kids Zone Layout & Defaults)
-                try { const s = localStorage.getItem('dashConfigV39'); return s ? JSON.parse(s) : DEFAULT_CONFIG; } catch(e) { return DEFAULT_CONFIG; }
+                // Versioning to force new schema update (V41 for Cost Fix)
+                try { const s = localStorage.getItem('dashConfigV41'); return s ? JSON.parse(s) : DEFAULT_CONFIG; } catch(e) { return DEFAULT_CONFIG; }
             });
 
             useEffect(() => {
@@ -849,7 +855,7 @@
 
                         if (hasChanges) {
                             const newConfig = { ...currentConfig, family: newFamily };
-                            localStorage.setItem('dashConfigV39', JSON.stringify(newConfig));
+                            localStorage.setItem('dashConfigV41', JSON.stringify(newConfig));
                             return newConfig;
                         }
                         return currentConfig;
@@ -881,7 +887,7 @@
 
             const saveConfig = (newConf) => {
                 setConfig(newConf);
-                localStorage.setItem('dashConfigV39', JSON.stringify(newConf));
+                localStorage.setItem('dashConfigV41', JSON.stringify(newConf));
                 setShowSettings(false);
             }
 
