@@ -98,7 +98,7 @@
             Smile: () => <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></svg>,
             Heart: () => <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>,
             Maximize: () => <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>,
-            Settings: () => <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+            Settings: () => <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
             Rainbow: () => <svg className="w-full h-full" viewBox="0 0 100 50" fill="none"><path d="M10 50 A 40 40 0 0 1 90 50" stroke="#ef4444" strokeWidth="6" strokeLinecap="round" /><path d="M20 50 A 30 30 0 0 1 80 50" stroke="#eab308" strokeWidth="6" strokeLinecap="round" /><path d="M30 50 A 20 20 0 0 1 70 50" stroke="#3b82f6" strokeWidth="6" strokeLinecap="round" /></svg>,
             Cart: () => <svg className="w-20 h-20 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>,
             Link: () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
@@ -249,8 +249,13 @@
 
             const handleSpin = () => {
                 if (points < cost || isSpinning) return;
-                onSpin(cost, null); // Deduct cost
-                setIsSpinning(true); setPrize(null);
+                
+                // Deduct cost immediately to update UI, but pass full calculation to parent
+                onSpin(cost, null); 
+                
+                setIsSpinning(true); 
+                setPrize(null);
+                
                 const randomSegment = Math.floor(Math.random() * activePrizes.length);
                 const extraDegrees = (360 - (randomSegment * (360/activePrizes.length))) - ((360/activePrizes.length) / 2);
                 setRotation(rotation + (360 * 5) + extraDegrees + (Math.random() * 20));
@@ -262,8 +267,9 @@
                     if (result.value !== 0 || result.type === 'sticker') {
                         playCelebrationSound();
                         triggerConfetti();
-                        onSpin(0, result);
                     }
+                    // Pass 0 cost here because we already deducted it at start of spin
+                    onSpin(0, result);
                 }, 4000);
             };
 
@@ -319,6 +325,8 @@
                 
                 if (!task.isCompleted) {
                     newCount = current + 1;
+                    // Update: Update timestamp on ANY progress
+                    
                     newScore += task.p;
                     playCelebrationSound();
                     triggerConfetti();
@@ -336,7 +344,8 @@
                     ...task, 
                     isCompleted: isComplete, 
                     completedCount: newCount,
-                    lastCompleted: isComplete ? new Date().toISOString() : task.lastCompleted 
+                    // FIX: Always update lastCompleted if there is progress, so daily reset logic knows it happened today
+                    lastCompleted: (newCount > 0 || isComplete) ? new Date().toISOString() : task.lastCompleted 
                 };
 
                 const newTasks = member.tasks.map(t => t.id === task.id ? updatedTask : t);
@@ -354,7 +363,15 @@
             const handleSpinResult = (cost, prize) => {
                 // Use latest member state from ref to avoid stale closures
                 const currentMember = memberRef.current;
-                let newScore = currentMember.score - cost;
+                
+                // If cost > 0, it means we are starting the spin
+                if (cost > 0) {
+                    onUpdate({ ...currentMember, score: Math.max(0, currentMember.score - cost) });
+                    return;
+                }
+
+                // If we are here, the spin finished (cost is 0), calculate winnings based on current score
+                let newScore = currentMember.score;
                 let newInv = currentMember.inventory || [];
                 
                 if (prize) {
@@ -365,7 +382,7 @@
                         newScore += parseInt(prize.value);
                     }
                 }
-                onUpdate({ ...currentMember, score: Math.max(0, newScore), inventory: newInv });
+                onUpdate({ ...currentMember, score: newScore, inventory: newInv });
             };
 
             const placeSticker = (stickerId, x, y) => {
@@ -437,6 +454,26 @@
                                         <div className="text-xs font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-full">+{task.p}</div>
                                     </div>
                                 ))}
+                                
+                                {/* Correction Controls */}
+                                <div className="mt-8 pt-6 border-t border-slate-200">
+                                    <h4 className="text-xs font-bold text-slate-400 uppercase mb-3">Parent Controls</h4>
+                                    <div className="flex gap-3 items-center flex-wrap">
+                                        <button onClick={() => onUpdate({...member, score: Math.max(0, member.score - 1)})} className="px-3 py-2 bg-red-50 text-red-500 rounded-lg text-xs font-bold border border-red-100 hover:bg-red-100 transition">-1</button>
+                                        <button onClick={() => onUpdate({...member, score: member.score + 1})} className="px-3 py-2 bg-green-50 text-green-500 rounded-lg text-xs font-bold border border-green-100 hover:bg-green-100 transition">+1</button>
+                                        <button onClick={() => onUpdate({...member, score: Math.max(0, member.score - 10)})} className="px-3 py-2 bg-red-50 text-red-500 rounded-lg text-xs font-bold border border-red-100 hover:bg-red-100 transition">-10</button>
+                                        <button onClick={() => onUpdate({...member, score: 0})} className="px-3 py-2 bg-slate-100 text-slate-500 rounded-lg text-xs font-bold border border-slate-200 hover:bg-slate-200 transition">Reset</button>
+                                        <div className="flex items-center gap-2 ml-auto">
+                                            <span className="text-[10px] font-bold text-slate-400">Set:</span>
+                                            <input 
+                                                type="number" 
+                                                value={member.score} 
+                                                onChange={(e) => onUpdate({...member, score: Math.max(0, parseInt(e.target.value) || 0)})}
+                                                className="w-16 bg-slate-50 border border-slate-200 rounded p-1 text-xs font-bold text-center"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
 
@@ -795,6 +832,21 @@
                                                 onChange={e => setTemp({...temp, photos: e.target.value})} 
                                             />
                                         </div>
+                                        
+                                        {/* Countdown Settings */}
+                                        <div className="pt-4 border-t border-slate-100 mt-4">
+                                             <h3 className="text-slate-400 uppercase text-xs font-bold mb-4 tracking-wider">Countdown Config</h3>
+                                             <div className="space-y-4">
+                                                <div>
+                                                    <label className="block text-xs font-bold text-slate-500 mb-1">Event Title</label>
+                                                    <input className="w-full bg-slate-50 p-3 rounded border border-slate-200" value={temp.countdown.title} onChange={e => setTemp({...temp, countdown: {...temp.countdown, title: e.target.value}})} />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-bold text-slate-500 mb-1">Target Date</label>
+                                                    <input type="date" className="w-full bg-slate-50 p-3 rounded border border-slate-200" value={temp.countdown.date} onChange={e => setTemp({...temp, countdown: {...temp.countdown, date: e.target.value}})} />
+                                                </div>
+                                             </div>
+                                        </div>
                                     </div>
                                 </section>
                              )}
@@ -820,13 +872,24 @@
             const touchStart = useRef(null);
             
             const [config, setConfig] = useState(() => {
-                // Versioning to force new schema update (V41 for Cost Fix)
-                try { const s = localStorage.getItem('dashConfigV41'); return s ? JSON.parse(s) : DEFAULT_CONFIG; } catch(e) { return DEFAULT_CONFIG; }
+                // Versioning to force new schema update (V42 for Countdown Settings & Layout Fix)
+                try { const s = localStorage.getItem('dashConfigV42'); return s ? JSON.parse(s) : DEFAULT_CONFIG; } catch(e) { return DEFAULT_CONFIG; }
             });
 
             useEffect(() => {
+                // Helper to get date string in Pacific Time
+                const getPacificDateString = (dateInput) => {
+                    const date = dateInput ? new Date(dateInput) : new Date();
+                    return date.toLocaleDateString('en-US', {
+                        timeZone: 'America/Los_Angeles',
+                        year: 'numeric',
+                        month: 'numeric',
+                        day: 'numeric'
+                    });
+                };
+
                 const checkDailyReset = () => {
-                    const today = new Date().toDateString();
+                    const todayPT = getPacificDateString();
                     
                     setConfig(currentConfig => {
                         let hasChanges = false;
@@ -835,10 +898,13 @@
                             
                             let memChanged = false;
                             const newTasks = mem.tasks.map(t => {
-                                const lastDateStr = t.lastCompleted ? new Date(t.lastCompleted).toDateString() : null;
+                                // If never touched, nothing to reset
+                                if (!t.lastCompleted) return t;
+
+                                const lastDatePT = getPacificDateString(t.lastCompleted);
                                 
-                                // If task has progress/completion and the last activity wasn't today, reset it
-                                if ((t.isCompleted || (t.completedCount > 0)) && lastDateStr && lastDateStr !== today) {
+                                // If task has progress/completion and the last activity wasn't today (in PT), reset it
+                                if ((t.isCompleted || (t.completedCount > 0)) && lastDatePT !== todayPT) {
                                     memChanged = true;
                                     // Reset progress but keep the task definition
                                     return { ...t, isCompleted: false, completedCount: 0 };
@@ -855,7 +921,7 @@
 
                         if (hasChanges) {
                             const newConfig = { ...currentConfig, family: newFamily };
-                            localStorage.setItem('dashConfigV41', JSON.stringify(newConfig));
+                            localStorage.setItem('dashConfigV42', JSON.stringify(newConfig));
                             return newConfig;
                         }
                         return currentConfig;
@@ -887,7 +953,7 @@
 
             const saveConfig = (newConf) => {
                 setConfig(newConf);
-                localStorage.setItem('dashConfigV41', JSON.stringify(newConf));
+                localStorage.setItem('dashConfigV42', JSON.stringify(newConf));
                 setShowSettings(false);
             }
 
