@@ -454,26 +454,6 @@
                                         <div className="text-xs font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-full">+{task.p}</div>
                                     </div>
                                 ))}
-                                
-                                {/* Correction Controls */}
-                                <div className="mt-8 pt-6 border-t border-slate-200">
-                                    <h4 className="text-xs font-bold text-slate-400 uppercase mb-3">Parent Controls</h4>
-                                    <div className="flex gap-3 items-center flex-wrap">
-                                        <button onClick={() => onUpdate({...member, score: Math.max(0, member.score - 1)})} className="px-3 py-2 bg-red-50 text-red-500 rounded-lg text-xs font-bold border border-red-100 hover:bg-red-100 transition">-1</button>
-                                        <button onClick={() => onUpdate({...member, score: member.score + 1})} className="px-3 py-2 bg-green-50 text-green-500 rounded-lg text-xs font-bold border border-green-100 hover:bg-green-100 transition">+1</button>
-                                        <button onClick={() => onUpdate({...member, score: Math.max(0, member.score - 10)})} className="px-3 py-2 bg-red-50 text-red-500 rounded-lg text-xs font-bold border border-red-100 hover:bg-red-100 transition">-10</button>
-                                        <button onClick={() => onUpdate({...member, score: 0})} className="px-3 py-2 bg-slate-100 text-slate-500 rounded-lg text-xs font-bold border border-slate-200 hover:bg-slate-200 transition">Reset</button>
-                                        <div className="flex items-center gap-2 ml-auto">
-                                            <span className="text-[10px] font-bold text-slate-400">Set:</span>
-                                            <input 
-                                                type="number" 
-                                                value={member.score} 
-                                                onChange={(e) => onUpdate({...member, score: Math.max(0, parseInt(e.target.value) || 0)})}
-                                                className="w-16 bg-slate-50 border border-slate-200 rounded p-1 text-xs font-bold text-center"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         )}
 
